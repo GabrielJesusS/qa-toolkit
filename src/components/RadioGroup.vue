@@ -32,8 +32,7 @@ provide('updateRadioGroupValue', updateValue)
             'qtk:flex-row': props.direction === 'horizontal',
             'qtk:flex-col': props.direction === 'vertical',
         }
-    )"
-    ]" role="radiogroup">
+    )" role="radiogroup">
         <slot />
     </div>
 </template>
