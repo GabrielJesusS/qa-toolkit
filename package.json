@@ -12,10 +12,12 @@
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.3",
+    "@tailwindcss/vite": "^4.1.18",
     "@types/chrome": "^0.1.1",
     "@types/node": "^24.0.15",
     "@vitejs/plugin-vue": "^6.0.0",
     "@vue/tsconfig": "^0.7.0",
+    "tailwindcss": "^4.1.18",
     "typescript": "~5.8.3",
     "vite": "^7.0.5",
     "vite-plugin-zip-pack": "^1.2.4",

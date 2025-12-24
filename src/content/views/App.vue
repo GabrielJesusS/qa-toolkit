@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Logo from '@/assets/crx.svg'
+import HelloWorld from '@/components/HelloWorld.vue';
 import { ref } from 'vue'
 
 const show = ref(false)
@@ -7,24 +8,17 @@ const toggle = () => show.value = !show.value
 </script>
 
 <template>
-  <div class="popup-container">
-    <div
-      v-show="show"
-      class="popup-content"
-      :class="show ? 'opacity-100' : 'opacity-0'"
-    >
-      <h1>HELLO CRXJS</h1>
+  <div class="fixed z-100 right-0 bottom-0 font-bold flex items-end m-5">
+    <div v-show="show" class="bg-white p-1 transition-opacity duration-300 " :class="show ? 'opacity-100' : 'opacity-0'">
+      <HelloWorld />
     </div>
-    <button
-      class="toggle-button"
-      @click="toggle()"
-    >
+    <button class="toggle-button flex bg-purple-400 justify-center size-10 cursor-pointer" @click="toggle()">
       <img :src="Logo" alt="CRXJS logo" class="button-icon">
     </button>
   </div>
 </template>
 
-<style scoped>
+<!-- <style scoped>
 .popup-container {
   position: fixed;
   right: 0;
@@ -73,4 +67,4 @@ const toggle = () => show.value = !show.value
 .button-icon {
   padding: 4px;
 }
-</style>
+</style> -->
