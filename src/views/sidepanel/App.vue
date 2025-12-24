@@ -4,7 +4,4 @@ import HelloWorld from '@/components/HelloWorld.vue'
 
 <template>
   <HelloWorld />
-  <div class="bg-amber-500">
-    DDDD
-  </div>
 </template>

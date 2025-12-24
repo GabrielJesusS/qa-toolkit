@@ -8,11 +8,11 @@ const toggle = () => show.value = !show.value
 </script>
 
 <template>
-  <div class="fixed z-100 right-0 bottom-0 font-bold flex items-end m-5">
-    <div v-show="show" class="bg-white p-1 transition-opacity duration-300 " :class="show ? 'opacity-100' : 'opacity-0'">
+  <div class="qtk:fixed qtk:z-100 qtk:right-0 qtk:bottom-0 qtk:font-bold qtk:flex qtk:items-end qtk:m-5">
+    <div v-show="show" class="qtk:bg-white qtk:p-1 qtk:transition-opacity qtk:duration-300 " :class="show ? 'qtk:opacity-100' : 'qtk:opacity-0'">
       <HelloWorld />
     </div>
-    <button class="toggle-button flex bg-purple-400 justify-center size-10 cursor-pointer" @click="toggle()">
+    <button class="toggle-button qtk:flex qtk:bg-purple-400 qtk:justify-center qtk:size-10 qtk:cursor-pointer" @click="toggle()">
       <img :src="Logo" alt="CRXJS logo" class="button-icon">
     </button>
   </div>
