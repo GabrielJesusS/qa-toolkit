@@ -32,10 +32,10 @@ const handleInput = (event: Event) => {
         :placeholder="props.placeholder" :disabled="props.disabled" :readonly="props.readonly" :class="clsx(
             'qtk:w-full qtk:px-3 qtk:py-2 qtk:border qtk:rounded-md qtk:text-sm',
             'qtk:transition-colors qtk:duration-200',
-            'focus:qtk:outline-none focus:qtk:ring-2',
+            'qtk:focus:outline-none qtk:focus:ring-2',
             {
-                'qtk:border-red-500 focus:qtk:ring-red-500': props.error,
-                'qtk:border-gray-300 focus:qtk:border-primary focus:qtk:ring-primary': !props.error,
+                'qtk:border-red-500 qtk:focus:ring-red-500': props.error,
+                'qtk:border-gray-300 qtk:focus:border-primary qtk:focus:ring-primary': !props.error,
                 'qtk:bg-gray-100 qtk:cursor-not-allowed qtk:text-gray-500': props.disabled,
                 'qtk:bg-white': !props.disabled,
             }

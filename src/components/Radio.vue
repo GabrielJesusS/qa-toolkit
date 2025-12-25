@@ -38,7 +38,7 @@ const isChecked = computed(() => radioGroupValue === props.value || props.modelV
     <div class="qtk:inline-flex qtk:items-center">
         <input :id="props.id" :name="radioGroupName || props.name" type="radio" :value="props.value" :checked="isChecked"
             :disabled="props.disabled"
-            class="qtk:w-4 qtk:h-4 qtk:text-primary qtk:border-gray-300 focus:qtk:ring-2 focus:qtk:ring-primary qtk:cursor-pointer disabled:qtk:cursor-not-allowed disabled:qtk:opacity-50"
+            class="qtk:w-4 qtk:h-4 qtk:text-primary qtk:border-gray-300 qtk:focus:ring-2 qtk:focus:ring-primary qtk:cursor-pointer qtk:disabled:cursor-not-allowed qtk:disabled:opacity-50"
             @change="handleChange" />
     </div>
 </template>

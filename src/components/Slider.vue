@@ -33,7 +33,7 @@ const toggle = () => {
     :class="clsx(
       'qtk:relative qtk:inline-flex qtk:h-6 qtk:w-11 qtk:items-center qtk:rounded-full',
       'qtk:transition-colors qtk:duration-200',
-      'focus:qtk:outline-none focus:qtk:ring-2 focus:qtk:ring-primary focus:qtk:ring-offset-2',
+      'qtk:focus:outline-none qtk:focus:ring-2 qtk:focus:ring-primary qtk:focus:ring-offset-2',
       {
         'qtk:bg-primary': props.modelValue,
         'qtk:bg-gray-300': !props.modelValue,

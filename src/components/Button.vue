@@ -26,10 +26,10 @@ const handleClick = (event: MouseEvent) => {
 }
 
 const variantClasses = {
-    primary: 'qtk:bg-primary qtk:text-white hover:qtk:bg-primary-dark focus:qtk:ring-primary',
-    secondary: 'qtk:bg-gray-600 qtk:text-white hover:qtk:bg-gray-700 focus:qtk:ring-gray-500',
-    danger: 'qtk:bg-red-600 qtk:text-white hover:qtk:bg-red-700 focus:qtk:ring-red-500',
-    ghost: 'qtk:bg-transparent qtk:text-gray-700 hover:qtk:bg-gray-100 focus:qtk:ring-gray-500',
+    primary: 'qtk:bg-primary qtk:text-white qtk:hover:bg-primary-dark focus:qtk:ring-primary',
+    secondary: 'qtk:bg-gray-600 qtk:text-white qtk:hover:bg-gray-700 focus:qtk:ring-gray-500',
+    danger: 'qtk:bg-red-600 qtk:text-white qtk:hover:bg-red-700 focus:qtk:ring-red-500',
+    ghost: 'qtk:bg-transparent qtk:text-gray-700 qtk:hover:bg-gray-100 focus:qtk:ring-gray-500',
 }
 
 const sizeClasses = {
@@ -41,7 +41,7 @@ const sizeClasses = {
 
 <template>
     <button :type="props.type" :disabled="props.disabled || props.loading" :class="clsx(
-        'qtk:inline-flex qtk:items-center qtk:justify-center qtk:font-medium qtk:rounded-md',
+        'qtk:inline-flex qtk:cursor-pointer qtk:items-center qtk:justify-center qtk:font-medium qtk:rounded-md',
         'qtk:transition-colors qtk:duration-200',
         'focus:qtk:outline-none focus:qtk:ring-2 focus:qtk:ring-offset-2',
         variantClasses[props.variant],
