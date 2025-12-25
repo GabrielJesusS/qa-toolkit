@@ -199,6 +199,23 @@ const handleSubmit = () => {
                             </div>
                         </RadioGroup>
                     </div>
+                    <div>
+                        <Label>Escolha uma opção (Horizontal)</Label>
+                        <div class="qtk:space-y-2">
+                            <div class="qtk:flex qtk:items-center qtk:gap-2">
+                                <Radio v-model="radioValue" name="radio-only" id="radio-7" value="option1" />
+                                <Label for="radio-7">Opção Solo 1</Label>
+                            </div>
+                            <div class="qtk:flex qtk:items-center qtk:gap-2">
+                                <Radio v-model="radioValue" name="radio-only" id="radio-8" value="option2" />
+                                <Label for="radio-8">Opção Solo 2</Label>
+                            </div>
+                            <div class="qtk:flex qtk:items-center qtk:gap-2">
+                                <Radio v-model="radioValue" name="radio-only" id="radio-9" value="option3" />
+                                <Label for="radio-9">Opção Solo 3</Label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
