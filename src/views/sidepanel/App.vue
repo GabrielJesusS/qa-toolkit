@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import HelloWorld from '@/components/HelloWorld.vue'
+import Stylesheet from '@/components/Stylesheet.vue'
 </script>
 
 <template>
-  <HelloWorld />
+  <Stylesheet />
 </template>
