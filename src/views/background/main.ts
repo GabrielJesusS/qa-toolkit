@@ -1,1 +1,5 @@
-console.log('[Great QA Toolkit] Background script started.');
+import { ExtensionClient } from "@/core/ExtensionClient";
+
+const extensionClient = new ExtensionClient();
+
+extensionClient.init();
