@@ -1,0 +1,1 @@
+console.log('[Great QA Toolkit] Background script started.');
