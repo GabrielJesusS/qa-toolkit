@@ -8,8 +8,10 @@
     "build": "vue-tsc -b && vite build"
   },
   "dependencies": {
+    "@vee-validate/valibot": "^4.15.1",
     "clsx": "^2.1.1",
     "valibot": "^1.2.0",
+    "vee-validate": "^4.15.1",
     "vue": "^3.5.17"
   },
   "devDependencies": {
