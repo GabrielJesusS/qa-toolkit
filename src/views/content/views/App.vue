@@ -1,18 +1,37 @@
 <script setup lang="ts">
-import Logo from '@/assets/crx.svg'
+import Logo from '@/assets/crx.svg?url'
 import HelloWorld from '@/components/HelloWorld.vue';
+import { browserClient } from '@/core/BrowserClient';
 import { ref } from 'vue'
 
 const show = ref(false)
-const toggle = () => show.value = !show.value
+const toggle = () => {
+  show.value = !show.value
+  test()
+}
+
+
+async function test() {
+  await browserClient.sendMessage(
+    {
+      type: "MESSAGE",
+      data: {
+        key: "value",
+      },
+    }
+  )
+}
+
 </script>
 
 <template>
   <div class="qtk:fixed qtk:z-100 qtk:right-0 qtk:bottom-0 qtk:font-bold qtk:flex qtk:items-end qtk:m-5">
-    <div v-show="show" class="qtk:bg-white qtk:p-1 qtk:transition-opacity qtk:duration-300 " :class="show ? 'qtk:opacity-100' : 'qtk:opacity-0'">
+    <div v-show="show" class="qtk:bg-white qtk:p-1 qtk:transition-opacity qtk:duration-300 "
+      :class="show ? 'qtk:opacity-100' : 'qtk:opacity-0'">
       <HelloWorld />
     </div>
-    <button class="toggle-button qtk:flex qtk:bg-purple-400 qtk:justify-center qtk:size-10 qtk:cursor-pointer" @click="toggle()">
+    <button class="toggle-button qtk:flex qtk:bg-purple-400 qtk:justify-center qtk:size-10 qtk:cursor-pointer"
+      @click="toggle()">
       <img :src="Logo" alt="CRXJS logo" class="button-icon">
     </button>
   </div>
