@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Logo from '@/assets/crx.svg'
+import Logo from '@/assets/crx.svg?url'
 import HelloWorld from '@/components/HelloWorld.vue';
 import { browserClient } from '@/core/BrowserClient';
 import { ref } from 'vue'
