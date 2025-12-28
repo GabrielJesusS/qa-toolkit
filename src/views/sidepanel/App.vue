@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import Stylesheet from '@/components/Stylesheet.vue'
+import ConfigProvider from '@/components/providers/ConfigProvider.vue';
+import Holder from '@/components/sections/Holder.vue';
 </script>
 
 <template>
-  <Stylesheet />
+  <ConfigProvider>
+    <Holder />
+  </ConfigProvider>
 </template>

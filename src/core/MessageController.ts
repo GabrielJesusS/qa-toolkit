@@ -8,11 +8,17 @@ type Sender = chrome.runtime.MessageSender;
 
 type ResponseSender = (response?: unknown) => void;
 
+type MessageHandler = (message: RawMessage, sender: Sender) => Promise<unknown>;
+
 class MessageController {
-  handlers = new Map<string, unknown>();
+  handlers = new Map<string, MessageHandler>();
 
   constructor() {
     this.handleMessage = this.handleMessage.bind(this);
+  }
+
+  registerHandler(action: string, handler: MessageHandler) {
+    this.handlers.set(action, handler);
   }
 
   async handleMessage(
@@ -30,12 +36,25 @@ class MessageController {
           message
         )} \n message format: ${stringifyIssues(parsedMessage.issues)}`,
       });
-      return true;
+      return;
+    }
+
+    if (this.handlers.has(parsedMessage.output.type)) {
+      const handler = this.handlers.get(parsedMessage.output.type)!;
+
+      const result = await handler(message, _);
+
+      sendResponse({
+        ok: true,
+        data: result,
+      });
+
+      return;
     }
 
     sendResponse({
-      ok: true,
-      data: { x: 1 },
+      ok: false,
+      error: `Invalid action: ${parsedMessage.output.type} - This action is not implemented yet or is not registered.`,
     });
   }
 }
