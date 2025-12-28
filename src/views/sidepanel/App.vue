@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import ConfigProvider from '@/components/providers/ConfigProvider.vue';
-import Holder from '@/components/sections/Holder.vue';
+import Home from '@/components/sections/Home.vue';
 </script>
 
 <template>
   <ConfigProvider>
-    <Holder />
+    <Home />
   </ConfigProvider>
 </template>

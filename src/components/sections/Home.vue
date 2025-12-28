@@ -2,14 +2,13 @@
 import Standby from './Standby.vue';
 import { inject } from 'vue';
 import { ProviderSetupSchema } from '@/schemas/provider-setup';
+import InitialSetup from './InitialSetup.vue';
 
 const providerSetup = inject<ProviderSetupSchema>('provider-setup');
 
 </script>
 
 <template>
-    <div v-if="!providerSetup?.setup">
-        initial setup
-    </div>
+    <InitialSetup v-if="!providerSetup?.setup" />
     <Standby v-if="!!providerSetup?.setup" />
 </template>
