@@ -20,7 +20,7 @@ export default defineManifest({
       matches: ["https://*/*"],
     },
   ],
-  permissions: ["sidePanel", "contentSettings"],
+  permissions: ["sidePanel", "contentSettings", "storage"],
   side_panel: {
     default_path: "src/views/sidepanel/index.html",
   },
