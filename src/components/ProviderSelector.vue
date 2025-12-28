@@ -12,14 +12,12 @@ export const PROVIDER_OPTIONS = Object.freeze([
 import clsx from "clsx";
 
 interface Props {
-    modelValue?: string | number | boolean
+    provider: string;
+    onChange: (value: string) => void;
 }
 
 const props = defineProps<Props>()
 
-const emit = defineEmits<{
-    'update:modelValue': [value: string | number | boolean]
-}>()
 
 </script>
 
@@ -32,9 +30,9 @@ const emit = defineEmits<{
                     'qtk:opacity-50 qtk:cursor-not-allowed qtk:grayscale-100': !option.enabled,
                     'qtk:cursor-pointer': option.enabled
                 })">
-                    <input @change="() => emit('update:modelValue', option.value)"
+                    <input @change="() => props.onChange(option.value)"
                         class="qtk:opacity-0 qtk:absolute qtk:pointer-events-none qtk:inset-0" name="provider"
-                        type="radio" :checked="props.modelValue === option.value" :value="option.value"
+                        type="radio" :checked="props.provider === option.value" :value="option.value"
                         :disabled="!option.enabled" />
                     <img :src="option.logo" :alt="option.label + ' logo'" class="qtk:h-10" />
                 </label>

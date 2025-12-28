@@ -7,8 +7,9 @@ import Helper from "../Helper.vue";
 import { TaigaLoginSchema } from "@/schemas/taiga-login";
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from "@vee-validate/valibot"
-import { computed, inject } from "vue";
+import { computed } from "vue";
 import { browserClient } from "@/core/BrowserClient";
+import { useSetupWizard } from "@/composables/useSetupWizard";
 
 
 const { errors, isSubmitting, handleSubmit } = useForm({
@@ -22,11 +23,7 @@ const { errors, isSubmitting, handleSubmit } = useForm({
 const { value: email } = useField<string>('email');
 const { value: password } = useField<string>('password');
 
-const wizardActions = inject<{
-    nextStep: () => void,
-    prevStep: () => void,
-    resetWizard: () => void
-}>('wizardActions');
+const { wizardActions } = useSetupWizard();
 
 
 const onSubmit = handleSubmit(async values => {
@@ -79,10 +76,9 @@ const hasPasswordError = computed(() => !!errors?.value.password);
 
 
             </form>
-            <Button @click="wizardActions?.prevStep" :loading="isSubmitting" type="submit" variant="danger">
+            <Button @click="wizardActions?.prevStep" :loading="isSubmitting" type="submit" variant="ghost" size="sm">
                 Back to Provider Selection
             </Button>
-
         </div>
     </section>
 </template>

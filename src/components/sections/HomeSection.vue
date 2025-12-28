@@ -2,17 +2,9 @@
 import Logo from "@/assets/logo.svg?component"
 import ProviderSelector from "../ProviderSelector.vue";
 import Button from "../Button.vue";
-import { inject, ref } from "vue";
+import { useSetupWizard } from "@/composables/useSetupWizard";
 
-type WizardActions = {
-    nextStep: () => void,
-    prevStep: () => void,
-    resetWizard: () => void,
-}
-
-const provider = ref('');
-
-const nextStep = inject<WizardActions>("wizardActions");
+const { wizardState, wizardActions } = useSetupWizard();
 
 </script>
 
@@ -30,8 +22,9 @@ const nextStep = inject<WizardActions>("wizardActions");
         <div class="qtk:text-lg md:qtk:text-xl qtk:text-gray-700 qtk:space-y-4 qtk:flex qtk:flex-col qtk:items-center">
             <p class="qtk:text-center">To start your journey, we need to setup your environment.</p>
             <h2 class="qtk:text-center">First - Select your provider:</h2>
-            <ProviderSelector v-model="provider" />
-            <Button @click="nextStep?.nextStep" type="button" :disabled="provider === ''">
+            <ProviderSelector :provider="wizardState?.provider ?? ''"
+                @change="provider => wizardState!.provider = provider" />
+            <Button @click="wizardActions?.nextStep" type="button" :disabled="wizardState?.provider === ''">
                 Get Started
             </Button>
         </div>
