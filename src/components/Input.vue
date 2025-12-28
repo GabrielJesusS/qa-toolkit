@@ -10,6 +10,7 @@ interface Props {
     id?: string
     name?: string
     error?: boolean
+    class?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -38,6 +39,7 @@ const handleInput = (event: Event) => {
                 'qtk:border-gray-300 qtk:focus:border-primary qtk:focus:ring-primary': !props.error,
                 'qtk:bg-gray-100 qtk:cursor-not-allowed qtk:text-gray-500': props.disabled,
                 'qtk:bg-white': !props.disabled,
-            }
+            },
+            props.class
         )" @input="handleInput" />
 </template>
