@@ -10,6 +10,8 @@ import { toTypedSchema } from "@vee-validate/valibot"
 import { computed } from "vue";
 import { browserClient } from "@/core/BrowserClient";
 import { useSetupWizard } from "@/composables/useSetupWizard";
+import { useConfig } from "@/composables/useConfig";
+import { HandlerMapEnum } from "@/core/enums/HandlerMapEnum";
 
 
 const { errors, isSubmitting, handleSubmit } = useForm({
@@ -24,20 +26,21 @@ const { value: email } = useField<string>('email');
 const { value: password } = useField<string>('password');
 
 const { wizardActions } = useSetupWizard();
+const { config } = useConfig();
 
 
 const onSubmit = handleSubmit(async values => {
-
-
     await browserClient.sendMessage({
-        type: "sign-in-taiga",
+        type: HandlerMapEnum.TAIGA_SIGN_IN,
         data: {
             email: values.email,
             password: values.password
         }
     })
 
+    config.value.provider = 'taiga';
 
+    wizardActions?.nextStep();
 });
 
 const hasEmailError = computed(() => !!errors?.value.email);
