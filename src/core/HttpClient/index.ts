@@ -1,3 +1,4 @@
+import { HTTPError } from "./HttpError";
 import { HttpMethodsEnum } from "./HttpMethodsEnum";
 import HttpStatusCode from "./HttpStatusCodeEnum";
 
@@ -45,8 +46,9 @@ async function parseResponse<T>(response: Response) {
   const parsedBody: T = await response.json();
 
   if (ERROR_STATUS_CODES.includes(response.status)) {
-    throw new Error(
-      `HTTP Error: ${response.status}\n Message: ${JSON.stringify(parsedBody)}`
+    throw new HTTPError(
+      `HTTP Error: ${response.status}\n Message: ${JSON.stringify(parsedBody)}`,
+      response.status
     );
   }
 
