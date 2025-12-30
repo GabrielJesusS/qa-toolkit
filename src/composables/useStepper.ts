@@ -1,4 +1,4 @@
-import { computed, provide, ref } from "vue";
+import { computed, ref } from "vue";
 
 export function useStepper(maxSteps = 3) {
   const step = ref(1);
@@ -16,28 +16,16 @@ export function useStepper(maxSteps = 3) {
     step.value--;
   };
 
-  const resetWizard = () => {
+  const resetStepper = () => {
     step.value = 1;
   };
-
-  provide("stepperActions", {
-    nextStep,
-    prevStep,
-    resetWizard,
-  });
-
-  provide("stepperState", {
-    step,
-    reachLimit,
-    maxSteps,
-  });
 
   return {
     step,
     reachLimit,
     nextStep,
     prevStep,
-    resetWizard,
+    resetStepper,
     maxSteps,
   };
 }

@@ -1,22 +1,17 @@
-import { inject, Ref } from "vue";
-
-type WizardActions = {
-  nextStep: () => void;
-  prevStep: () => void;
-  resetWizard: () => void;
-};
-
-type WizardState = {
-  provider: string;
-};
+import { WizardCTXKey } from "@/contexts/WizardContext";
+import { inject } from "vue";
 
 export function useSetupWizard() {
-  const wizardActions = inject<WizardActions>("wizardActions");
+  const wizardContext = inject(WizardCTXKey);
 
-  const wizardState = inject<Ref<WizardState>>("wizardState");
+  if (!wizardContext) {
+    throw new Error(
+      "useSetupWizard must be used within a useSetupWizardProvider"
+    );
+  }
 
   return {
-    wizardState,
-    wizardActions,
+    wizardState: wizardContext.state,
+    wizardActions: wizardContext.actions,
   };
 }

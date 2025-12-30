@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import HomeSection from "./HomeSection.vue";
 import SetupWizard from "./SetupWizard.vue";
+import Success from "./Success.vue";
 import TaigaSetup from "./TaigaSetup.vue";
 </script>
 
@@ -11,6 +12,9 @@ import TaigaSetup from "./TaigaSetup.vue";
         </template>
         <template v-slot:step-2>
             <TaigaSetup />
+        </template>
+        <template v-slot:step-3>
+            <Success />
         </template>
     </SetupWizard>
 </template>

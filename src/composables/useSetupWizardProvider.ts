@@ -1,24 +1,39 @@
 import { provide, ref } from "vue";
 import { useStepper } from "./useStepper";
-
-type WizardState = {
-  provider: string;
-};
+import { WizardCTXKey } from "@/contexts/WizardContext";
 
 export function useSetupWizardProvider() {
-  const { nextStep, prevStep, resetWizard, step } = useStepper();
+  const { nextStep, prevStep, resetStepper, step } = useStepper();
 
-  const wizardState = ref<WizardState>({
+  const wizardState = ref({
     provider: "",
+    finished: false,
   });
 
-  provide("wizardActions", {
-    nextStep,
-    prevStep,
-    resetWizard,
-  });
+  const resetWizard = () => {
+    resetStepper();
+    wizardState.value = {
+      provider: "",
+      finished: false,
+    };
+  };
 
-  provide("wizardState", wizardState);
+  const finishWizard = () => {
+    wizardState.value = {
+      ...wizardState.value,
+      finished: true,
+    };
+  };
+
+  provide(WizardCTXKey, {
+    state: wizardState,
+    actions: {
+      nextStep,
+      prevStep,
+      resetWizard,
+      finishWizard,
+    },
+  });
 
   return {
     step,

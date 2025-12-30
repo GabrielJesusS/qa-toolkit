@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import Standby from './Standby.vue';
-import { inject } from 'vue';
-import { ProviderSetupSchema } from '@/schemas/provider-setup';
 import InitialSetup from './InitialSetup.vue';
+import { useConfig } from '@/composables/useConfig';
 
-const providerSetup = inject<ProviderSetupSchema>('provider-setup');
+const { config } = useConfig()
 
 </script>
 
 <template>
-    <InitialSetup v-if="!providerSetup?.setup" />
-    <Standby v-if="!!providerSetup?.setup" />
+    <Transition name="slide-fade" mode="out-in">
+        <Standby v-if="!!config?.setup" />
+        <InitialSetup v-else />
+    </Transition>
 </template>
