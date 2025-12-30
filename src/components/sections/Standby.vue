@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { ProviderSetupSchema } from '@/schemas/provider-setup';
-import { inject } from 'vue';
 import Button from '../Button.vue';
+import { useConfig } from '@/composables/useConfig';
 
-const providerSetup = inject<ProviderSetupSchema>('provider-setup');
-const resetSetup = inject<() => void>('reset-setup');
+const { config, resetSetup } = useConfig();
 
 </script>
 
@@ -15,7 +13,7 @@ const resetSetup = inject<() => void>('reset-setup');
             Data loaded successfully!
         </h1>
         <p>
-            Provider: {{ providerSetup?.provider }}
+            Provider: {{ config?.provider }}
         </p>
         <Button type="button" @click="resetSetup">
             Reset Setup
