@@ -8,8 +8,10 @@ const { config } = useConfig()
 </script>
 
 <template>
-    <Transition name="slide-fade" mode="out-in">
-        <Standby v-if="!!config?.setup" />
-        <InitialSetup v-else />
-    </Transition>
+    <div class="qtk:max-h-screen qtk:overflow-hidden">
+        <Transition name="slide-fade" mode="out-in">
+            <Standby v-if="!!config?.setup" />
+            <InitialSetup v-else />
+        </Transition>
+    </div>
 </template>
