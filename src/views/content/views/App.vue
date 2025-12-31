@@ -1,89 +1,40 @@
 <script setup lang="ts">
-import Logo from '@/assets/crx.svg?url'
-import HelloWorld from '@/components/HelloWorld.vue';
-import { browserClient } from '@/core/BrowserClient';
-import { ref } from 'vue'
+import Logo from "@/assets/logo.svg?component"
+import { Transition } from 'vue'
+import Paper from '@/components/Paper.vue';
+import IssueCreator from '@/components/sections/IssueCreator.vue';
+import { useScreenshot } from '@/composables/useScreenshot';
 
-const show = ref(false)
+const screenshot = useScreenshot()
+
 const toggle = () => {
-  show.value = !show.value
-  test()
-}
+  if (screenshot.screenshotState.value.image === null) {
+    screenshot.takeScreenshot();
+    return
+  }
 
-
-async function test() {
-  await browserClient.sendMessage(
-    {
-      type: "MESSAGE",
-      data: {
-        key: "value",
-      },
-    }
-  )
+  screenshot.clearScreenshot();
 }
 
 </script>
 
 <template>
-  <div class="qtk:fixed qtk:z-100 qtk:right-0 qtk:bottom-0 qtk:font-bold qtk:flex qtk:items-end qtk:m-5">
-    <div v-show="show" class="qtk:bg-white qtk:p-1 qtk:transition-opacity qtk:duration-300 "
-      :class="show ? 'qtk:opacity-100' : 'qtk:opacity-0'">
-      <HelloWorld />
-    </div>
-    <button class="toggle-button qtk:flex qtk:bg-purple-400 qtk:justify-center qtk:size-10 qtk:cursor-pointer"
+  <div data-qtk-anchor
+    class="qtk:fixed qtk:z-100 qtk:gap-4 qtk:right-0 qtk:bottom-0 qtk:font-bold qtk:flex qtk:flex-col qtk:items-end qtk:m-5">
+    <Transition mode="out-in" name="slide-fade">
+      <div v-show="!!screenshot.screenshotState.value.image"
+        class="qtk:transition-opacity qtk:duration-300 qtk:max-w-xs qtk:overflow-hidden"
+        :class="!!screenshot.screenshotState.value.image ? 'qtk:opacity-100' : 'qtk:opacity-0'">
+        <Paper class="qtk:w-xs">
+          <IssueCreator v-if="!!screenshot.screenshotState.value.image"
+            :screenshot="screenshot.screenshotState.value.image" />
+        </Paper>
+      </div>
+    </Transition>
+    <button
+      class="qtk:bg-white qtk:size-fit qtk:block qtk:p-1 qtk:rounded-full qtk:shadow-lg qtk:focus:qtk:outline-none qtk:cursor-pointer"
       @click="toggle()">
-      <img :src="Logo" alt="CRXJS logo" class="button-icon">
+      <Logo class="qtk:size-6 qtk:text-primary" />
     </button>
   </div>
 </template>
-
-<!-- <style scoped>
-.popup-container {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  margin: 1.25rem;
-  z-index: 100;
-  display: flex;
-  align-items: flex-end;
-  font-family: ui-sans-serif, system-ui, sans-serif;
-  user-select: none;
-  line-height: 1em;
-}
-
-.popup-content {
-  background-color: white;
-  color: #1f2937;
-  border-radius: 0.5rem;
-  box-shadow:
-    0 4px 6px -1px rgb(0 0 0 / 0.1),
-    0 2px 4px -2px rgb(0 0 0 / 0.1);
-  width: max-content;
-  height: min-content;
-  padding: 0.5rem 1rem;
-  margin: auto 0.5rem 0 0;
-  transition: opacity 300ms;
-}
-
-.toggle-button {
-  display: flex;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 9999px;
-  box-shadow:
-    0 1px 3px 0 rgb(0 0 0 / 0.1),
-    0 1px 2px -1px rgb(0 0 0 / 0.1);
-  cursor: pointer;
-  border: none;
-  background-color: #288cd7;
-}
-
-.toggle-button:hover {
-  background-color: #1e6aa3;
-}
-
-.button-icon {
-  padding: 4px;
-}
-</style> -->
