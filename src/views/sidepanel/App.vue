@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import Stylesheet from '@/components/Stylesheet.vue'
+import ConfigProvider from '@/components/providers/ConfigProvider.vue';
+import Home from '@/components/sections/Home.vue';
 </script>
 
 <template>
-  <Stylesheet />
+  <ConfigProvider>
+    <Home />
+  </ConfigProvider>
 </template>
