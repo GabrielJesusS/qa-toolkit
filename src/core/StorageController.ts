@@ -2,20 +2,24 @@ import { BaseSchema, parseAsync, InferOutput } from "valibot";
 
 type GenericSchema = BaseSchema<any, any, any>;
 
-export class StorageController {
-  async set(key: string, data: unknown) {
+class StorageController {
+  static async set(key: string, data: unknown) {
     await chrome.storage.local.set({
       [key]: data,
     });
   }
 
-  async get(key: string): Promise<unknown>;
-  async get<T extends GenericSchema>(
+  static async remove(key: string) {
+    await chrome.storage.local.remove(key);
+  }
+
+  static async get(key: string): Promise<unknown>;
+  static async get<T extends GenericSchema>(
     key: string,
     schema: T
   ): Promise<InferOutput<T>>;
 
-  async get<T extends GenericSchema>(
+  static async get<T extends GenericSchema>(
     key: string,
     schema?: T
   ): Promise<InferOutput<T>> {
@@ -34,3 +38,5 @@ export class StorageController {
     return parsedResult;
   }
 }
+
+export { StorageController };
