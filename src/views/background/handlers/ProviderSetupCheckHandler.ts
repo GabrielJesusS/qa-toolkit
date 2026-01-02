@@ -1,6 +1,8 @@
 import { StorageKeyEnum } from "@/core/enums/StorageKeyEnum";
+import { StorageController } from "@/core/StorageController";
 import { BaseMessage } from "@/schemas/base-message";
 import { ProviderSetupSchema } from "@/schemas/provider-setup";
+import { TaigaService } from "@/services/TaigaService";
 import { parseAsync } from "valibot";
 
 const FALLBACK = {
@@ -11,16 +13,27 @@ const FALLBACK = {
 export async function ProviderSetupCheckHandler(message: unknown) {
   await parseAsync(BaseMessage, message);
 
-  const result = await chrome.storage.local.get(StorageKeyEnum.PROVIDER_SETUP);
+  try {
+    const providerSetup = await StorageController.get(
+      StorageKeyEnum.PROVIDER_SETUP,
+      ProviderSetupSchema
+    );
 
-  if (!result[StorageKeyEnum.PROVIDER_SETUP]) {
+    if (providerSetup.provider === "taiga") {
+      const taigaService = new TaigaService();
+
+      const result = await taigaService.checkLogin();
+
+      if (!result) {
+        await StorageController.remove(StorageKeyEnum.PROVIDER_SETUP);
+        return FALLBACK;
+      }
+    }
+
+    return providerSetup;
+  } catch (error) {
+    console.error("Provider setup check failed:", error);
+
     return FALLBACK;
   }
-
-  const parsedData = await parseAsync(
-    ProviderSetupSchema,
-    result[StorageKeyEnum.PROVIDER_SETUP]
-  );
-
-  return parsedData;
 }
