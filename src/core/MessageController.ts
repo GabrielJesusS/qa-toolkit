@@ -26,36 +26,46 @@ class MessageController {
     _: Sender,
     sendResponse: ResponseSender
   ) {
-    const parsedMessage = safeParse(BaseMessage, message);
+    try {
+      const parsedMessage = safeParse(BaseMessage, message);
 
-    if (!parsedMessage.success) {
-      console.error("Invalid message received:", parsedMessage.issues);
+      if (!parsedMessage.success) {
+        console.error("Invalid message received:", parsedMessage.issues);
+        sendResponse({
+          ok: false,
+          error: `Invalid \n SendedData: ${JSON.stringify(
+            message
+          )} \n message format: ${stringifyIssues(parsedMessage.issues)}`,
+        });
+        return;
+      }
+
+      if (this.handlers.has(parsedMessage.output.type)) {
+        const handler = this.handlers.get(parsedMessage.output.type)!;
+
+        const result = await handler(message, _);
+
+        sendResponse({
+          ok: true,
+          data: result,
+        });
+
+        return;
+      }
+
       sendResponse({
         ok: false,
-        error: `Invalid \n SendedData: ${JSON.stringify(
-          message
-        )} \n message format: ${stringifyIssues(parsedMessage.issues)}`,
+        error: `Invalid action: ${parsedMessage.output.type} - This action is not implemented yet or is not registered.`,
       });
-      return;
-    }
-
-    if (this.handlers.has(parsedMessage.output.type)) {
-      const handler = this.handlers.get(parsedMessage.output.type)!;
-
-      const result = await handler(message, _);
-
+    } catch (error) {
+      console.error("Error processing message:", error);
       sendResponse({
-        ok: true,
-        data: result,
+        ok: false,
+        error: `Error processing message: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
       });
-
-      return;
     }
-
-    sendResponse({
-      ok: false,
-      error: `Invalid action: ${parsedMessage.output.type} - This action is not implemented yet or is not registered.`,
-    });
   }
 }
 

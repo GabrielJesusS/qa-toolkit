@@ -17,6 +17,10 @@ const toggle = () => {
   screenshot.clearScreenshot();
 }
 
+const onSuccess = () => {
+  screenshot.clearScreenshot();
+}
+
 </script>
 
 <template>
@@ -29,7 +33,7 @@ const toggle = () => {
         class="qtk:transition-opacity qtk:duration-300 qtk:max-w-xs qtk:overflow-hidden"
         :class="!!screenshot.screenshotState.value.image ? 'qtk:opacity-100' : 'qtk:opacity-0'">
         <Paper class="qtk:w-xs">
-          <IssueCreator v-if="!!screenshot.screenshotState.value.image"
+          <IssueCreator @success="onSuccess" v-if="!!screenshot.screenshotState.value.image"
             :screenshot="screenshot.screenshotState.value.image" />
         </Paper>
       </div>

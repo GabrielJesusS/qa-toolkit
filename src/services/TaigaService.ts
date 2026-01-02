@@ -25,6 +25,13 @@ type ProjectResponse = {
   name: string;
 };
 
+type IssueData = {
+  subject: string;
+  description: string;
+  print: string;
+  project: string;
+};
+
 const MAX_RETRIES = 2;
 
 const CACHE_INTERVAL = 2 * 60 * 60 * 1000; // 2 hours
@@ -174,7 +181,29 @@ class TaigaService {
     }
   }
 
-  async createIssue(): Promise<void> {}
+  async #createIssueDescription(description: string, print: string) {
+    return `<p>Issue created via QA Toolkit</p><img src="${print}"/><p>${description}</p>`;
+  }
+
+  async createIssue(issueData: IssueData): Promise<void> {
+    try {
+      const description = await this.#createIssueDescription(
+        issueData.description,
+        issueData.print
+      );
+
+      await this.taigaClient("/issues", {
+        method: HttpMethodsEnum.POST,
+        body: JSON.stringify({
+          subject: issueData.subject,
+          description: description,
+          project: issueData.project,
+        }),
+      });
+    } catch (error) {
+      throw new Error(`Failed to create issue in Taiga: ${error}`);
+    }
+  }
 
   async checkLogin(): Promise<boolean> {
     try {

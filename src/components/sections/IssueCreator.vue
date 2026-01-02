@@ -3,7 +3,8 @@ import NewIssueForm from '../forms/NewIssueForm.vue';
 
 
 interface Props {
-    screenshot: string
+    screenshot: string;
+    onSuccess?: () => void;
 }
 
 const props = defineProps<Props>()
@@ -16,8 +17,7 @@ const props = defineProps<Props>()
         <h1 class="qtk:font-semibold">
             Create issue
         </h1>
-        <img :src="props.screenshot" alt="Screenshot of the issue"
-            class="qtk:w-full qtk:rounded-md" />
-        <NewIssueForm />
+        <img :src="props.screenshot" alt="Screenshot of the issue" class="qtk:w-full qtk:rounded-md" />
+        <NewIssueForm :screenshot="props.screenshot" :onSuccess="props.onSuccess" />
     </section>
 </template>
