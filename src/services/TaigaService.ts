@@ -104,6 +104,7 @@ class TaigaService {
       if (error.statusCode === HttpStatusCode.UNAUTHORIZED && tokens) {
         if (TaigaService.#retries >= MAX_RETRIES) {
           await this.removeTokens();
+          TaigaService.#retries = 0;
           throw new Error("Max retries reached for Taiga authentication");
         }
 
@@ -121,7 +122,6 @@ class TaigaService {
 
       throw new Error("Failed to connect to Taiga");
     } finally {
-      TaigaService.#retries = 0;
       TaigaService.#refresh = null;
     }
   }
@@ -163,6 +163,9 @@ class TaigaService {
         "/auth/refresh",
         {
           method: HttpMethodsEnum.POST,
+          headers: {
+            Authorization: "",
+          },
           body: JSON.stringify({
             refresh: tokens.refresh,
           }),
@@ -175,6 +178,7 @@ class TaigaService {
         id: tokens.id,
       });
 
+      TaigaService.#retries = 0;
       return true;
     } catch (error) {
       return false;
