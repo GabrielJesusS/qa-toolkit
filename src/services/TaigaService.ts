@@ -11,14 +11,25 @@ type TaigaTokenResponse = {
   auth_token: string;
 };
 
-type ProjectResponse = {
+type SignInResponse = {
   id: number;
+} & TaigaTokenResponse;
+
+type TaigaProjectResponse = {
+  id: number;
+  name: string;
+};
+
+type ProjectResponse = {
+  id: string;
   name: string;
 };
 
 const MAX_RETRIES = 2;
 
-const CHECK_LOGIN_INTERVAL = 2 * 60 * 60 * 1000; // 2 hours
+const CACHE_INTERVAL = 2 * 60 * 60 * 1000; // 2 hours
+
+const CACHE = new Map<string, { timestamp: number; data: unknown }>();
 
 class TaigaService {
   static readonly baseUrl = "https://api.taiga.io/api/v1";
@@ -26,8 +37,6 @@ class TaigaService {
   static #refresh: null | Promise<boolean> = null;
 
   static #retries = 0;
-
-  static #lastCheck = 0;
 
   async getAuth() {
     try {
@@ -55,14 +64,31 @@ class TaigaService {
   ): Promise<ReturnType<typeof client<T>>> {
     const tokens = await this.getAuth();
 
+    const isGetRequest =
+      !options?.method || options.method === HttpMethodsEnum.GET;
+
     try {
+      if (isGetRequest) {
+        const cached = CACHE.get(path);
+
+        if (cached && Date.now() - cached.timestamp < CACHE_INTERVAL) {
+          return cached.data as ReturnType<typeof client<T>>;
+        }
+      }
+
       const header =
         tokens === null ? {} : { Authorization: `Bearer ${tokens.token}` };
 
-      return await client<T>(`${TaigaService.baseUrl}${path}`, {
+      const result = await client<T>(`${TaigaService.baseUrl}${path}`, {
         ...options,
         headers: { ...options?.headers, ...header },
       });
+
+      if (isGetRequest) {
+        CACHE.set(path, { timestamp: Date.now(), data: result });
+      }
+
+      return result;
     } catch (error) {
       if (!(error instanceof HTTPError)) {
         throw new Error(`Failed to connect to Taiga: ${error}`);
@@ -95,7 +121,7 @@ class TaigaService {
 
   async signIn(email: string, password: string): Promise<boolean> {
     try {
-      const response = await this.taigaClient<TaigaTokenResponse>("/auth", {
+      const response = await this.taigaClient<SignInResponse>("/auth", {
         method: HttpMethodsEnum.POST,
         body: JSON.stringify({
           type: "normal",
@@ -107,6 +133,7 @@ class TaigaService {
       this.setTokens({
         refresh: response.data.refresh,
         token: response.data.auth_token,
+        id: response.data.id,
       });
 
       return true;
@@ -138,6 +165,7 @@ class TaigaService {
       this.setTokens({
         refresh: response.data.refresh,
         token: response.data.auth_token,
+        id: tokens.id,
       });
 
       return true;
@@ -150,14 +178,6 @@ class TaigaService {
 
   async checkLogin(): Promise<boolean> {
     try {
-      const now = Date.now();
-
-      if (now - TaigaService.#lastCheck < CHECK_LOGIN_INTERVAL) {
-        return true;
-      }
-
-      TaigaService.#lastCheck = now;
-
       await this.taigaClient("/users/me", {
         method: HttpMethodsEnum.GET,
       });
@@ -170,14 +190,23 @@ class TaigaService {
 
   async listProjects(): Promise<ProjectResponse[]> {
     try {
-      const response = await client<ProjectResponse[]>(
-        `${TaigaService.baseUrl}/projects`,
+      const tokens = await this.getAuth();
+
+      if (!tokens) {
+        throw new Error("Auth not found for listing projects");
+      }
+
+      const response = await this.taigaClient<TaigaProjectResponse[]>(
+        `/projects?member=${tokens.id}`,
         {
           method: HttpMethodsEnum.GET,
         }
       );
 
-      return response.data;
+      return response.data.map((project) => ({
+        id: project.id.toString(),
+        name: project.name,
+      }));
     } catch (error) {
       if (!(error instanceof HTTPError)) {
         throw new Error(`Failed to connect to Taiga: ${error}`);

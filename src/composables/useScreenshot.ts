@@ -28,7 +28,7 @@ export function useScreenshot() {
 
       screenshotState.value.image = parsed.screenshot;
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       screenshotState.value.isLoading = false;
     }

@@ -4,6 +4,7 @@ import { Transition } from 'vue'
 import Paper from '@/components/Paper.vue';
 import IssueCreator from '@/components/sections/IssueCreator.vue';
 import { useScreenshot } from '@/composables/useScreenshot';
+import clsx from 'clsx';
 
 const screenshot = useScreenshot()
 
@@ -19,8 +20,10 @@ const toggle = () => {
 </script>
 
 <template>
-  <div data-qtk-anchor
-    class="qtk:fixed qtk:z-100 qtk:gap-4 qtk:right-0 qtk:bottom-0 qtk:font-bold qtk:flex qtk:flex-col qtk:items-end qtk:m-5">
+  <div data-qtk-anchor :class="clsx('qtk:fixed qtk:z-100 qtk:gap-4 qtk:right-0 qtk:bottom-0 qtk:font-bold qtk:flex qtk:flex-col qtk:items-end qtk:m-5',
+    {
+      'qtk:opacity-0': !!screenshot.screenshotState.value.isLoading
+    })">
     <Transition mode="out-in" name="slide-fade">
       <div v-show="!!screenshot.screenshotState.value.image"
         class="qtk:transition-opacity qtk:duration-300 qtk:max-w-xs qtk:overflow-hidden"
