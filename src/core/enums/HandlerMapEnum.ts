@@ -4,6 +4,8 @@ export const HandlerMapEnum = {
   TAKE_SCREENSHOT: "take-screenshot",
   LIST_PROJECTS: "list-projects",
   CREATE_ISSUE: "create-issue",
+  SAVE_TAIGA_SETTINGS: "save-taiga-settings",
+  GET_TAIGA_SETTINGS: "get-taiga-settings",
 } as const;
 
 export type HandlerMapEnum =
