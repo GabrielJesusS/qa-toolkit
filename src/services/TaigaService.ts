@@ -32,6 +32,10 @@ type IssueData = {
   project: string;
 };
 
+type TaigaClientOptions = {
+  auth?: boolean;
+} & Parameters<typeof client>[1];
+
 const MAX_RETRIES = 2;
 
 const CACHE_INTERVAL = 2 * 60 * 60 * 1000; // 2 hours
@@ -65,16 +69,24 @@ class TaigaService {
     await StorageController.remove(StorageKeyEnum.TAIGA_AUTH);
   }
 
-  async taigaClient<T>(
-    path: `/${string}`,
-    options?: Parameters<typeof client>[1]
-  ): Promise<ReturnType<typeof client<T>>> {
+  async getAuthHeader() {
     const tokens = await this.getAuth();
 
-    const isGetRequest =
-      !options?.method || options.method === HttpMethodsEnum.GET;
+    if (tokens) {
+      return { Authorization: `Bearer ${tokens.token}` };
+    }
 
+    return {};
+  }
+
+  async taigaClient<T>(
+    path: `/${string}`,
+    options?: TaigaClientOptions
+  ): Promise<ReturnType<typeof client<T>>> {
     try {
+      const isGetRequest =
+        !options?.method || options.method === HttpMethodsEnum.GET;
+
       if (isGetRequest) {
         const cached = CACHE.get(path);
 
@@ -83,12 +95,13 @@ class TaigaService {
         }
       }
 
-      const header =
-        tokens === null ? {} : { Authorization: `Bearer ${tokens.token}` };
+      const { auth = true, ...rest } = options || {};
+
+      const header = auth ? await this.getAuthHeader() : {};
 
       const result = await client<T>(`${TaigaService.baseUrl}${path}`, {
-        ...options,
-        headers: { ...options?.headers, ...header },
+        ...rest,
+        headers: { ...header, ...rest?.headers },
       });
 
       if (isGetRequest) {
@@ -101,9 +114,11 @@ class TaigaService {
         throw new Error(`Failed to connect to Taiga: ${error}`);
       }
 
+      const tokens = await this.getAuth();
+
       if (error.statusCode === HttpStatusCode.UNAUTHORIZED && tokens) {
         if (TaigaService.#retries >= MAX_RETRIES) {
-          await this.removeTokens();
+          // await this.removeTokens();
           TaigaService.#retries = 0;
           throw new Error("Max retries reached for Taiga authentication");
         }
@@ -163,9 +178,7 @@ class TaigaService {
         "/auth/refresh",
         {
           method: HttpMethodsEnum.POST,
-          headers: {
-            Authorization: "",
-          },
+          auth: false,
           body: JSON.stringify({
             refresh: tokens.refresh,
           }),
