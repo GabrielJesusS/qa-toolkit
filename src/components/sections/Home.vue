@@ -10,7 +10,7 @@ const { config } = useConfig()
 <template>
     <div class="qtk:max-h-screen qtk:overflow-hidden">
         <Transition name="slide-fade" mode="out-in">
-            <Standby v-if="!!config?.setup" />
+            <Standby v-if="!!config?.setup && config.provider" />
             <InitialSetup v-else />
         </Transition>
     </div>
