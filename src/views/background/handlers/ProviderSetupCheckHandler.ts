@@ -25,8 +25,10 @@ export async function ProviderSetupCheckHandler(message: unknown) {
       const result = await taigaService.checkLogin();
 
       if (!result) {
-        await StorageController.remove(StorageKeyEnum.PROVIDER_SETUP);
-        return FALLBACK;
+        return {
+          ...providerSetup,
+          setup: false,
+        };
       }
     }
 
