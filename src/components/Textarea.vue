@@ -10,6 +10,7 @@ interface Props {
     id?: string
     name?: string
     error?: boolean
+    maxlength?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -28,7 +29,7 @@ const handleInput = (event: Event) => {
 </script>
 
 <template>
-    <textarea :id="props.id" :name="props.name" :value="props.modelValue" :placeholder="props.placeholder" :disabled="props.disabled"
+    <textarea :id="props.id" :name="props.name" :value="props.modelValue" :maxlength="props.maxlength" :placeholder="props.placeholder" :disabled="props.disabled"
         :readonly="props.readonly" :rows="props.rows" :class="clsx(
             'qtk:w-full qtk:px-3 qtk:py-2 qtk:border qtk:rounded-md qtk:text-sm',
             'qtk:transition-colors qtk:duration-200 qtk:resize-y',

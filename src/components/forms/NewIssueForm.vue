@@ -10,6 +10,8 @@ import { NewIssueSchema } from '@/schemas/new-issue';
 import ProjectSelector from '../ProjectSelector.vue';
 import { browserClient } from '@/core/BrowserClient';
 import { HandlerMapEnum } from '@/core/enums/HandlerMapEnum';
+import { useSnackbar } from '@/composables/useSnackbar';
+import Textarea from '../Textarea.vue';
 
 interface Props {
     screenshot: string;
@@ -27,23 +29,31 @@ const { errors, isSubmitting, handleSubmit } = useForm({
     }
 });
 
+const { notify } = useSnackbar()
+
 const { value: title } = useField<string>('title');
 const { value: description } = useField<string>('description');
 const { value: project } = useField<string>('project');
 
 
 const onSubmit = handleSubmit(async values => {
-    await browserClient.sendMessage({
-        type: HandlerMapEnum.CREATE_ISSUE,
-        data: {
-            title: values.title,
-            description: values.description,
-            projectId: values.project,
-            print: props.screenshot,
-        },
-    });
+    try {
+        await browserClient.sendMessage({
+            type: HandlerMapEnum.CREATE_ISSUE,
+            data: {
+                title: values.title,
+                description: values.description,
+                projectId: values.project,
+                print: props.screenshot,
+            },
+        });
 
-    props.onSuccess?.();
+
+        notify('Issue created successfully!', 'success');
+        props.onSuccess?.();
+    } catch (error) {
+        notify('Failed to create issue, please try again.', 'error');
+    }
 });
 
 const hasTitleError = computed(() => !!errors?.value.title);
@@ -57,14 +67,15 @@ const hasDescriptionError = computed(() => !!errors?.value.description);
     <form @submit="onSubmit" class="qtk:space-y-4 qtk:max-w-2xs qtk:flex qtk:flex-col qtk:items-stretch qtk:w-full">
         <div>
             <Label for="issue-title" required>Title</Label>
-            <Input id="issue-title" :error="hasTitleError" v-model="title" type="text" placeholder="Issue title" />
+            <Input :maxlength="255" id="issue-title" :error="hasTitleError" v-model="title" type="text"
+                placeholder="Issue title" />
             <Helper :error="hasTitleError" v-if="hasTitleError">{{ errors.title }}</Helper>
         </div>
 
         <div>
             <Label for="issue-description" required>Description</Label>
-            <Input id="issue-description" :error="hasDescriptionError" v-model="description" type="text"
-                placeholder="Issue description" />
+            <Textarea :maxlength="512" id="issue-description" :error="hasDescriptionError" v-model="description"
+                type="text" placeholder="Issue description" />
             <Helper :error="hasDescriptionError" v-if="hasDescriptionError">{{ errors.description }}</Helper>
         </div>
 
