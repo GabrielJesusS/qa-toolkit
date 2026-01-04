@@ -12,6 +12,8 @@ import { browserClient } from '@/core/BrowserClient';
 import { HandlerMapEnum } from '@/core/enums/HandlerMapEnum';
 import { useSnackbar } from '@/composables/useSnackbar';
 import Textarea from '../Textarea.vue';
+import { useTaigaSettings } from '@/composables/useTaigaSettings';
+import { useConfig } from '@/composables/useConfig';
 
 interface Props {
     screenshot: string;
@@ -20,11 +22,16 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const { config } = useConfig();
+const { settings } = useTaigaSettings();
+
+const isTaigaProvider = computed(() => config.value.provider === "taiga");
+
 const { errors, isSubmitting, handleSubmit } = useForm({
     validationSchema: toTypedSchema(NewIssueSchema),
     initialValues: {
         title: '',
-        project: '',
+        project: isTaigaProvider.value ? settings.value.defaultProjectId : '',
         description: '',
     }
 });
@@ -79,7 +86,7 @@ const hasDescriptionError = computed(() => !!errors?.value.description);
             <Helper :error="hasDescriptionError" v-if="hasDescriptionError">{{ errors.description }}</Helper>
         </div>
 
-        <ProjectSelector v-model="project" />
+        <ProjectSelector v-model="project" v-show="!settings.defaultProjectId" />
 
         <Button :loading="isSubmitting" type="submit">
             Create issue
