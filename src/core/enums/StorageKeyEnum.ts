@@ -1,5 +1,5 @@
 export const StorageKeyEnum = {
-  PROVIDER_SETUP: "provider-setup",
+  APP_CONFIG: "app-config",
   TAIGA_AUTH: "taiga-auth",
   TAIGA_SETTINGS: "taiga-settings",
 } as const;

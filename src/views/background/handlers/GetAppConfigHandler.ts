@@ -1,41 +1,42 @@
 import { StorageKeyEnum } from "@/core/enums/StorageKeyEnum";
 import { StorageController } from "@/core/StorageController";
 import { BaseMessage } from "@/schemas/base-message";
-import { ProviderSetupSchema } from "@/schemas/provider-setup";
+import { AppConfigSchema } from "@/schemas/settings/app-config";
 import { TaigaService } from "@/services/TaigaService";
 import { parseAsync } from "valibot";
 
-const FALLBACK = {
+const DEFAULT_SETTINGS = {
   setup: false,
   provider: "",
 };
 
-export async function ProviderSetupCheckHandler(message: unknown) {
+export async function GetAppConfigHandler(message: unknown) {
   await parseAsync(BaseMessage, message);
 
   try {
-    const providerSetup = await StorageController.get(
-      StorageKeyEnum.PROVIDER_SETUP,
-      ProviderSetupSchema
+    const appConfig = await StorageController.get(
+      StorageKeyEnum.APP_CONFIG,
+      AppConfigSchema
     );
 
-    if (providerSetup.provider === "taiga") {
+    if (appConfig.provider === "taiga") {
       const taigaService = new TaigaService();
 
       const result = await taigaService.checkLogin();
 
       if (!result) {
         return {
-          ...providerSetup,
+          ...DEFAULT_SETTINGS,
+          ...appConfig,
           setup: false,
         };
       }
     }
 
-    return providerSetup;
+    return { ...DEFAULT_SETTINGS, ...appConfig };
   } catch (error) {
     console.error("Provider setup check failed:", error);
 
-    return FALLBACK;
+    return DEFAULT_SETTINGS;
   }
 }

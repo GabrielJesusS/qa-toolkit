@@ -14,7 +14,7 @@ export async function TaigaSignInHandler(message: unknown) {
     parsedMessage.data.password
   );
 
-  await StorageController.set(StorageKeyEnum.PROVIDER_SETUP, {
+  await StorageController.set(StorageKeyEnum.APP_CONFIG, {
     provider: "taiga",
     setup: true,
   });

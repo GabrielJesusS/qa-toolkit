@@ -1,16 +1,16 @@
 import { ConfigCTXKey } from "@/contexts/ConfigContext";
 import { browserClient } from "@/core/BrowserClient";
 import { HandlerMapEnum } from "@/core/enums/HandlerMapEnum";
-import { ProviderSetupSchema } from "@/schemas/provider-setup";
+import { AppConfigSchema } from "@/schemas/settings/app-config";
 import { parseAsync } from "valibot";
 import { onMounted, provide, ref } from "vue";
 
 const check = async () => {
   const result = await browserClient.sendMessage({
-    type: HandlerMapEnum.PROVIDER_SETUP_CHECK,
+    type: HandlerMapEnum.GET_APP_CONFIG,
   });
 
-  const parsed = await parseAsync(ProviderSetupSchema, result);
+  const parsed = await parseAsync(AppConfigSchema, result);
 
   return parsed;
 };
@@ -18,26 +18,26 @@ const check = async () => {
 export function useConfigProvider() {
   const hasLoaded = ref(false);
 
-  const providerSetup = ref({
+  const appConfig = ref({
     setup: false,
     provider: "",
   });
 
   function resetSetup() {
-    providerSetup.value = { setup: false, provider: "" };
+    appConfig.value = { setup: false, provider: "" };
   }
 
   onMounted(async () => {
     if (!hasLoaded.value) {
-      providerSetup.value = await check();
+      appConfig.value = await check();
       hasLoaded.value = true;
     }
   });
 
-  providerSetup;
+  appConfig;
 
   provide(ConfigCTXKey, {
-    config: providerSetup,
+    config: appConfig,
     resetSetup,
   });
 

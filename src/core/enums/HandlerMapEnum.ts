@@ -1,5 +1,5 @@
 export const HandlerMapEnum = {
-  PROVIDER_SETUP_CHECK: "provider-setup-check",
+  GET_APP_CONFIG: "get-app-config",
   TAIGA_SIGN_IN: "taiga-sign-in",
   TAKE_SCREENSHOT: "take-screenshot",
   LIST_PROJECTS: "list-projects",

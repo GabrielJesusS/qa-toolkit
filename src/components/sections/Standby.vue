@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import Logo from "@/assets/logo.svg?component"
-import Button from "../Button.vue";
-import { useConfig } from "@/composables/useConfig";
 import TabGroup from "../TabGroup.vue";
 import Tab from "../Tab.vue";
 import TabPanel from "../TabPanel.vue";
 import { ref } from "vue";
 import TaigaSettings from "../settings/TaigaSettings.vue";
-
-const { resetSetup } = useConfig()
+import GeneralSettings from "../settings/GeneralSettings.vue";
 
 const activeTab = ref<string>('general');
 
@@ -31,9 +28,7 @@ const activeTab = ref<string>('general');
                     <Tab value="taiga">Taiga Settings</Tab>
                 </div>
                 <TabPanel value="general">
-                    <Button variant="danger" @click="resetSetup" type="button">
-                        Restart Setup
-                    </Button>
+                    <GeneralSettings />
                 </TabPanel>
                 <TabPanel value="taiga">
                     <TaigaSettings />
