@@ -27,8 +27,8 @@ const onSuccess = () => {
 </script>
 
 <template>
-  <ConfigProvider>
-    <SnackbarProvider>
+  <SnackbarProvider>
+    <ConfigProvider>
       <div data-qtk-anchor :class="clsx('qtk:fixed qtk:z-100 qtk:gap-4 qtk:right-0 qtk:bottom-0 qtk:font-bold qtk:flex qtk:flex-col qtk:items-end qtk:m-5',
         {
           'qtk:opacity-0': !!screenshot.screenshotState.value.isLoading
@@ -49,7 +49,7 @@ const onSuccess = () => {
           <Logo class="qtk:size-6 qtk:text-primary" />
         </button>
       </div>
-      <SnackbarContainer />
-    </SnackbarProvider>
-  </ConfigProvider>
+    </ConfigProvider>
+    <SnackbarContainer />
+  </SnackbarProvider>
 </template>

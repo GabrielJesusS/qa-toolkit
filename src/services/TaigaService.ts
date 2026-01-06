@@ -4,6 +4,7 @@ import { HTTPError } from "@/core/HttpClient/HttpError";
 import { HttpMethodsEnum } from "@/core/HttpClient/HttpMethodsEnum";
 import HttpStatusCode from "@/core/HttpClient/HttpStatusCodeEnum";
 import { StorageController } from "@/core/StorageController";
+import { TrackInfo } from "@/core/types/TrackInfo";
 import { TaigaAuthSchema } from "@/schemas/taiga-auth";
 
 type TaigaTokenResponse = {
@@ -30,11 +31,24 @@ type IssueData = {
   description: string;
   print: string;
   project: string;
+  trackInfo?: TrackInfo[];
 };
 
 type TaigaClientOptions = {
   auth?: boolean;
 } & Parameters<typeof client>[1];
+
+type IssueResponse = {
+  id: number;
+};
+
+const truncateUrl = (url: string, max = 60) => {
+  if (url.length <= max) return url;
+
+  return `${url.slice(0, 35)}…${url.slice(-15)}`;
+};
+
+const formatUrl = (url: string) => `[${truncateUrl(url)}](${url})`;
 
 const MAX_RETRIES = 2;
 
@@ -198,18 +212,47 @@ class TaigaService {
     }
   }
 
-  async #createIssueDescription(description: string, print: string) {
-    return `<p>Issue created via QA Toolkit</p><img src="${print}"/><p>${description}</p>`;
+  async #formatIssueDescription(
+    description: string,
+    print: string,
+    trackInfo?: TrackInfo[]
+  ) {
+    let content = "";
+
+    content += `![](${print}) \n`;
+
+    content += `${description} \n`;
+
+    if (trackInfo && trackInfo.length > 0) {
+      content += "## Tracked Network Requests: \n";
+
+      content += "| Resource | Origin | Code | Requested At | \n";
+
+      content += "| --- | --- | --- | --- | \n";
+
+      trackInfo.forEach((track) => {
+        const date = new Date(track.createdAt);
+
+        content += `| ${formatUrl(track.url)} | ${formatUrl(track.origin)} | ${
+          track.code
+        } | ${date.toLocaleString()} | \n`;
+      });
+    }
+
+    content += `_**Issue created via QA Toolkit**_`;
+
+    return content;
   }
 
   async createIssue(issueData: IssueData): Promise<void> {
     try {
-      const description = await this.#createIssueDescription(
+      const description = await this.#formatIssueDescription(
         issueData.description,
-        issueData.print
+        issueData.print,
+        issueData.trackInfo
       );
 
-      await this.taigaClient("/issues", {
+      await this.taigaClient<IssueResponse>("/issues", {
         method: HttpMethodsEnum.POST,
         body: JSON.stringify({
           subject: issueData.subject,

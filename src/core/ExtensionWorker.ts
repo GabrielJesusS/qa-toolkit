@@ -2,13 +2,7 @@ import { AppConfigSchema } from "@/schemas/settings/app-config";
 import { StorageKeyEnum } from "./enums/StorageKeyEnum";
 import messageController from "./MessageController";
 import { StorageController } from "./StorageController";
-
-type TrackInfo = {
-  url: string;
-  createdAt: number;
-  origin: string;
-  code: string;
-};
+import { TrackInfo } from "./types/TrackInfo";
 
 const Track = new Map<string, TrackInfo>();
 

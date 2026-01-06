@@ -1,4 +1,5 @@
 import { StorageKeyEnum } from "@/core/enums/StorageKeyEnum";
+import { ExtensionWorker } from "@/core/ExtensionWorker";
 import { StorageController } from "@/core/StorageController";
 import { CreateIssueMessage } from "@/schemas/messages/CreateIssueMessage";
 import { AppConfigSchema } from "@/schemas/settings/app-config";
@@ -16,11 +17,16 @@ export async function CreateIssueHandler(message: unknown) {
   if (appConfig.provider === "taiga") {
     const taigaService = new TaigaService();
 
+    const trackInfo = appConfig.sendNetwork
+      ? ExtensionWorker.getTrackedRequests()
+      : undefined;
+
     await taigaService.createIssue({
       subject: parsedMessage.data.title,
       description: parsedMessage.data.description,
       project: parsedMessage.data.projectId,
       print: parsedMessage.data.print,
+      trackInfo: trackInfo,
     });
   }
 }

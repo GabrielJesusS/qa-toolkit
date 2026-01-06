@@ -5,7 +5,7 @@ import Label from "../Label.vue";
 import Helper from "../Helper.vue";
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from "@vee-validate/valibot"
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import { NewIssueSchema } from '@/schemas/new-issue';
 import ProjectSelector from '../ProjectSelector.vue';
 import { browserClient } from '@/core/BrowserClient';
@@ -29,6 +29,7 @@ const isTaigaProvider = computed(() => config.value.provider === "taiga");
 
 const { errors, isSubmitting, handleSubmit } = useForm({
     validationSchema: toTypedSchema(NewIssueSchema),
+
     initialValues: {
         title: '',
         project: isTaigaProvider.value ? settings.value.defaultProjectId : '',
@@ -40,7 +41,11 @@ const { notify } = useSnackbar()
 
 const { value: title } = useField<string>('title');
 const { value: description } = useField<string>('description');
-const { value: project } = useField<string>('project');
+const { value: project, setValue } = useField<string>('project');
+
+watch(settings, () => {
+    setValue(settings.value.defaultProjectId)
+})
 
 
 const onSubmit = handleSubmit(async values => {
@@ -86,6 +91,9 @@ const hasDescriptionError = computed(() => !!errors?.value.description);
             <Helper :error="hasDescriptionError" v-if="hasDescriptionError">{{ errors.description }}</Helper>
         </div>
 
+        <p>
+            {{ errors.project }}
+        </p>
         <ProjectSelector v-model="project" v-show="!settings.defaultProjectId" />
 
         <Button :loading="isSubmitting" type="submit">
