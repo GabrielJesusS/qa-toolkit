@@ -33,14 +33,14 @@ const onProjectChange = (event: Event) => {
 
 <template>
     <div class="qtk:space-y-4">
-        <div class="qtk:flex qtk:gap-4 qtk:items-end">
-            <div>
+        <div class="qtk:flex qtk:gap-2 qtk:items-end qtk:w-full">
+            <div class="qtk:w-full">
                 <Label for="issue-project">Select a default project</Label>
                 <Select :value="settings.defaultProjectId" @change="onProjectChange" v-bind="$attrs"
                     :options="projects.map(project => ({ label: project.name, value: project.id }))" id="issue-project"
                     placeholder="Select a project"></Select>
             </div>
-            <Button type="button" @click="resetProject">
+            <Button variant="danger" type="button" @click="resetProject">
                 Reset
             </Button>
         </div>
