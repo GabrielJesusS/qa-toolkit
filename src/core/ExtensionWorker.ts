@@ -1,6 +1,6 @@
 import messageController from "./MessageController";
 
-export class ExtensionClient {
+export class ExtensionWorker {
   #setMessageListener() {
     chrome.runtime.onMessage.addListener((...x) => {
       messageController.handleMessage(...x);
