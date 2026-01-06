@@ -1,13 +1,20 @@
 <script setup lang="ts">
 import { useConfigProvider } from '@/composables/useConfigProvider';
+import { Transition } from 'vue';
 
-const { hasLoaded } = useConfigProvider();
+type Props = {
+    lazy?: boolean;
+}
+
+const { isLoading } = useConfigProvider();
+
+const props = defineProps<Props>();
 
 </script>
 
 <template>
-    <slot v-if="hasLoaded" />
-    <div v-else>
-        Loading...
-    </div>
+    <transition name="fade" mode="out-in">
+        <slot name="loading" v-if="isLoading && props.lazy" />
+        <slot v-else />
+    </transition>
 </template>

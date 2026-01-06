@@ -1,9 +1,14 @@
 import { TaigaConfigCTXKey } from "@/contexts/TaigaConfigContext";
 import { browserClient } from "@/core/BrowserClient";
 import { HandlerMapEnum } from "@/core/enums/HandlerMapEnum";
+import { StorageKeyEnum } from "@/core/enums/StorageKeyEnum";
 import { TaigaSettingsSchema } from "@/schemas/settings/taiga-settings";
 import { safeParseAsync } from "valibot";
-import { onMounted, provide, ref } from "vue";
+import { onMounted, provide, ref, watch } from "vue";
+
+type SetterValue =
+  | TaigaSettingsSchema
+  | ((oldConfig: TaigaSettingsSchema) => TaigaSettingsSchema);
 
 const getSettings = async () => {
   const result = await browserClient.sendMessage({
@@ -14,31 +19,55 @@ const getSettings = async () => {
 
   if (!parsed.success) {
     console.error("Failed to parse Taiga settings:", parsed.issues);
-    return null;
+    return {
+      defaultProjectId: "",
+      defaultProjectName: "",
+    };
   }
 
   return parsed.output;
 };
 
-const setSettings = async (settings: TaigaSettingsSchema) => {
-  await browserClient.sendMessage({
-    type: HandlerMapEnum.SAVE_TAIGA_SETTINGS,
-    data: settings,
-  });
-};
-
 export const useTaigaSettingsProvider = () => {
+  const hasLoadedData = ref(false);
+
   const taigaSettings = ref<TaigaSettingsSchema>({
     defaultProjectId: "",
     defaultProjectName: "",
   });
 
-  onMounted(async () => {
-    const result = await getSettings();
-
-    if (result) {
-      taigaSettings.value = result;
+  const setSettings = async (value: SetterValue) => {
+    if (typeof value === "function") {
+      taigaSettings.value = value(taigaSettings.value);
+      return;
     }
+
+    taigaSettings.value = value;
+  };
+
+  onMounted(async () => {
+    if (!hasLoadedData.value) {
+      taigaSettings.value = await getSettings();
+    }
+
+    chrome.storage.local.onChanged.addListener(async (content) => {
+      if (content[StorageKeyEnum.TAIGA_SETTINGS]) {
+        hasLoadedData.value = false;
+        taigaSettings.value = await getSettings();
+      }
+    });
+  });
+
+  watch(taigaSettings, async (newSettings) => {
+    if (hasLoadedData.value) {
+      await browserClient.sendMessage({
+        type: HandlerMapEnum.SAVE_TAIGA_SETTINGS,
+        data: newSettings,
+      });
+      return;
+    }
+
+    hasLoadedData.value = true;
   });
 
   provide(TaigaConfigCTXKey, {

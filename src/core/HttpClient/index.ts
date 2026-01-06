@@ -7,7 +7,7 @@ type CustomHeaders =
       "Content-Type"?: string;
       Authorization?: string;
     }
-  | {};
+  | Record<string, string>;
 
 type HTTPClientCustomOptions = Omit<RequestInit, "headers" | "method"> & {
   headers?: CustomHeaders;
@@ -35,7 +35,13 @@ const ERROR_STATUS_CODES = [
 ];
 
 function mountHeader(customHeader?: CustomHeaders) {
-  return { ...DEFAULT_HEADERS, ...customHeader };
+  const mountedHeaders = new Headers({ ...DEFAULT_HEADERS, ...customHeader });
+
+  if (mountedHeaders.get("Content-Type") === "multipart/form-data") {
+    mountedHeaders.delete("Content-Type");
+  }
+
+  return mountedHeaders;
 }
 
 async function parseResponse<T>(response: Response) {
@@ -60,6 +66,8 @@ export async function client<T>(
   options?: HTTPClientCustomOptions
 ): Promise<HTTPClientExecutionReturn<T>> {
   const headers = mountHeader(options?.headers);
+
+  console.log(headers.get('Content-Type'));
 
   const response = await fetch(url, {
     ...options,

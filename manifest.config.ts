@@ -12,7 +12,7 @@ export default defineManifest({
     default_icon: {
       48: "public/logo.png",
     },
-    // default_popup: "src/views/popup/index.html",
+    default_popup: "src/views/popup/index.html",
   },
   content_scripts: [
     {
@@ -20,7 +20,13 @@ export default defineManifest({
       matches: ["https://*/*"],
     },
   ],
-  permissions: ["sidePanel", "contentSettings", "storage", "activeTab"],
+  permissions: [
+    "sidePanel",
+    "contentSettings",
+    "storage",
+    "activeTab",
+    "webRequest",
+  ],
   host_permissions: ["<all_urls>"],
   side_panel: {
     default_path: "src/views/sidepanel/index.html",

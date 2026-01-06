@@ -38,6 +38,14 @@ const onSubmit = handleSubmit(async values => {
         }
     })
 
+    await browserClient.sendMessage({
+        type: HandlerMapEnum.SET_APP_CONFIG,
+        data: {
+            ...config.value,
+            provider: 'taiga'
+        }
+    });
+
     config.value.provider = 'taiga';
 
     wizardActions?.nextStep();

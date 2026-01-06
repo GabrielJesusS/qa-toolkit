@@ -1,13 +1,14 @@
+import { AppConfigSchema } from "@/schemas/settings/app-config";
 import type { InjectionKey, Ref } from "vue";
 
-type QAToolkitConfig = {
-  provider: string;
-  setup: boolean;
-};
-
 export interface ConfigContext {
-  config: Ref<QAToolkitConfig>;
+  config: Ref<AppConfigSchema>;
   resetSetup: () => void;
+  setConfig: (
+    newConfig:
+      | AppConfigSchema
+      | ((oldConfig: AppConfigSchema) => AppConfigSchema)
+  ) => void;
 }
 
 export const ConfigCTXKey: InjectionKey<ConfigContext> =

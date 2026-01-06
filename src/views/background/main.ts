@@ -1,14 +1,6 @@
 import "@/views/background/handlers/_index";
-import { ExtensionClient } from "@/core/ExtensionClient";
+import { ExtensionWorker } from "@/core/ExtensionWorker";
 
-const extensionClient = new ExtensionClient();
+const extensionWorker = new ExtensionWorker();
 
-extensionClient.init();
-
-chrome.action.onClicked.addListener(async (tab) => {
-  if (!tab.id) return;
-
-  await chrome.sidePanel.open({
-    tabId: tab.id,
-  });
-});
+extensionWorker.init();

@@ -1,47 +1,82 @@
 import { ConfigCTXKey } from "@/contexts/ConfigContext";
 import { browserClient } from "@/core/BrowserClient";
 import { HandlerMapEnum } from "@/core/enums/HandlerMapEnum";
-import { ProviderSetupSchema } from "@/schemas/provider-setup";
+import { StorageKeyEnum } from "@/core/enums/StorageKeyEnum";
+import { AppConfigSchema } from "@/schemas/settings/app-config";
 import { parseAsync } from "valibot";
-import { onMounted, provide, ref } from "vue";
+import { onMounted, provide, ref, watch } from "vue";
+
+type SetterValue =
+  | AppConfigSchema
+  | ((oldConfig: AppConfigSchema) => AppConfigSchema);
 
 const check = async () => {
   const result = await browserClient.sendMessage({
-    type: HandlerMapEnum.PROVIDER_SETUP_CHECK,
+    type: HandlerMapEnum.GET_APP_CONFIG,
   });
 
-  const parsed = await parseAsync(ProviderSetupSchema, result);
+  const parsed = await parseAsync(AppConfigSchema, result);
 
   return parsed;
 };
 
 export function useConfigProvider() {
-  const hasLoaded = ref(false);
+  const isLoading = ref(true);
 
-  const providerSetup = ref({
+  const hasLoadedData = ref(false);
+
+  const appConfig = ref<AppConfigSchema>({
     setup: false,
+    sendNetwork: false,
     provider: "",
   });
 
-  function resetSetup() {
-    providerSetup.value = { setup: false, provider: "" };
+  function setConfig(value: SetterValue) {
+    if (typeof value === "function") {
+      appConfig.value = value(appConfig.value);
+      return;
+    }
+
+    appConfig.value = value;
   }
 
-  onMounted(async () => {
-    if (!hasLoaded.value) {
-      providerSetup.value = await check();
-      hasLoaded.value = true;
+  function resetSetup() {
+    setConfig({ setup: false, provider: "" });
+  }
+
+  watch(appConfig, async (newConfig) => {
+    if (hasLoadedData.value) {
+      await browserClient.sendMessage({
+        type: HandlerMapEnum.SET_APP_CONFIG,
+        data: newConfig,
+      });
+      return;
     }
+
+    hasLoadedData.value = true;
   });
 
-  providerSetup;
+  onMounted(async () => {
+    if (!hasLoadedData.value) {
+      appConfig.value = await check();
+      isLoading.value = false;
+    }
+
+    chrome.storage.local.onChanged.addListener(async (content) => {
+      if (content[StorageKeyEnum.APP_CONFIG]) {
+        hasLoadedData.value = false;
+        appConfig.value = await check();
+      }
+    });
+  });
 
   provide(ConfigCTXKey, {
-    config: providerSetup,
+    config: appConfig,
     resetSetup,
+    setConfig,
   });
 
   return {
-    hasLoaded,
+    isLoading,
   };
 }

@@ -4,6 +4,7 @@ import { HTTPError } from "@/core/HttpClient/HttpError";
 import { HttpMethodsEnum } from "@/core/HttpClient/HttpMethodsEnum";
 import HttpStatusCode from "@/core/HttpClient/HttpStatusCodeEnum";
 import { StorageController } from "@/core/StorageController";
+import { TrackInfo } from "@/core/types/TrackInfo";
 import { TaigaAuthSchema } from "@/schemas/taiga-auth";
 
 type TaigaTokenResponse = {
@@ -30,11 +31,50 @@ type IssueData = {
   description: string;
   print: string;
   project: string;
+  trackInfo?: TrackInfo[];
 };
 
 type TaigaClientOptions = {
   auth?: boolean;
 } & Parameters<typeof client>[1];
+
+type IssueResponse = {
+  id: number;
+};
+
+type AttachmentResponse = {
+  url: string;
+};
+
+const truncateUrl = (url: string, max = 60) => {
+  if (url.length <= max) return url;
+
+  return `${url.slice(0, 35)}…${url.slice(-15)}`;
+};
+
+const formatUrl = (url: string) => `[${truncateUrl(url)}](${url})`;
+
+function base64ToFile(
+  base64: string,
+  fileName: string,
+  mimeType?: string
+): File {
+  const [header, data] = base64.split(",");
+  const mime =
+    mimeType ??
+    header?.match(/data:(.*?);base64/)?.[1] ??
+    "application/octet-stream";
+
+  const binary = atob(data);
+  const len = binary.length;
+  const bytes = new Uint8Array(len);
+
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+
+  return new File([bytes], fileName, { type: mime });
+}
 
 const MAX_RETRIES = 2;
 
@@ -198,23 +238,79 @@ class TaigaService {
     }
   }
 
-  async #createIssueDescription(description: string, print: string) {
-    return `<p>Issue created via QA Toolkit</p><img src="${print}"/><p>${description}</p>`;
+  async #formatIssueDescription(
+    description: string,
+    print: string,
+    trackInfo?: TrackInfo[]
+  ) {
+    let content = "";
+
+    content += `![](${print}) \n`;
+
+    content += `${description} \n`;
+
+    if (trackInfo && trackInfo.length > 0) {
+      content += "## Tracked Network Requests: \n";
+
+      content += "| Resource | Origin | Code | Requested At | \n";
+
+      content += "| --- | --- | --- | --- | \n";
+
+      trackInfo.forEach((track) => {
+        const date = new Date(track.createdAt);
+
+        content += `| ${formatUrl(track.url)} | ${formatUrl(track.origin)} | ${
+          track.code
+        } | ${date.toLocaleString()} | \n`;
+      });
+    }
+
+    content += `_**Issue created via QA Toolkit**_`;
+
+    return content;
   }
 
   async createIssue(issueData: IssueData): Promise<void> {
     try {
-      const description = await this.#createIssueDescription(
-        issueData.description,
-        issueData.print
-      );
-
-      await this.taigaClient("/issues", {
+      const response = await this.taigaClient<IssueResponse>("/issues", {
         method: HttpMethodsEnum.POST,
         body: JSON.stringify({
           subject: issueData.subject,
-          description: description,
           project: issueData.project,
+        }),
+      });
+
+      const attachmentContent = new FormData();
+
+      attachmentContent.append("object_id", response.data.id.toString());
+      attachmentContent.append("project", issueData.project);
+      attachmentContent.append(
+        "attached_file",
+        base64ToFile(issueData.print, "screenshot.png")
+      );
+
+      const attachment = await this.taigaClient<AttachmentResponse>(
+        "/issues/attachments",
+        {
+          method: HttpMethodsEnum.POST,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          body: attachmentContent,
+        }
+      );
+
+      const description = await this.#formatIssueDescription(
+        issueData.description,
+        attachment.data.url,
+        issueData.trackInfo
+      );
+
+      await this.taigaClient<IssueResponse>(`/issues/${response.data.id}`, {
+        method: HttpMethodsEnum.PATCH,
+        body: JSON.stringify({
+          description: description,
+          version: 1,
         }),
       });
     } catch (error) {
