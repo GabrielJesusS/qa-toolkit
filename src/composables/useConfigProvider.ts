@@ -47,12 +47,9 @@ export function useConfigProvider() {
         type: HandlerMapEnum.SET_APP_CONFIG,
         data: newConfig,
       });
-
-      console.log("SENDED DATA");
       return;
     }
 
-    console.log("LOADED DATA");
     hasLoaded.value = true;
   });
 
