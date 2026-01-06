@@ -9,23 +9,24 @@ const { settings, setSettings } = useTaigaSettings();
 const { projects } = useListProjects();
 
 const resetProject = () => {
-    settings.value.defaultProjectId = '';
-    settings.value.defaultProjectName = '';
-    setSettings(settings.value);
+    setSettings({
+        defaultProjectId: '',
+        defaultProjectName: '',
+    });
 }
-
-
 
 const onProjectChange = (event: Event) => {
     if (!(event.target instanceof HTMLSelectElement)) return;
 
     const value = event.target.value;
-    settings.value.defaultProjectId = value;
-    const name = projects.value.find(project => project.id === value)?.name || '';
-    settings.value.defaultProjectName = name;
-    setSettings(settings.value);
-}
 
+    const name = projects.value.find(project => project.id === value)?.name || '';
+
+    setSettings({
+        defaultProjectId: value,
+        defaultProjectName: name,
+    });
+}
 
 </script>
 
