@@ -42,6 +42,10 @@ type IssueResponse = {
   id: number;
 };
 
+type AttachmentResponse = {
+  url: string;
+};
+
 const truncateUrl = (url: string, max = 60) => {
   if (url.length <= max) return url;
 
@@ -49,6 +53,28 @@ const truncateUrl = (url: string, max = 60) => {
 };
 
 const formatUrl = (url: string) => `[${truncateUrl(url)}](${url})`;
+
+function base64ToFile(
+  base64: string,
+  fileName: string,
+  mimeType?: string
+): File {
+  const [header, data] = base64.split(",");
+  const mime =
+    mimeType ??
+    header?.match(/data:(.*?);base64/)?.[1] ??
+    "application/octet-stream";
+
+  const binary = atob(data);
+  const len = binary.length;
+  const bytes = new Uint8Array(len);
+
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+
+  return new File([bytes], fileName, { type: mime });
+}
 
 const MAX_RETRIES = 2;
 
@@ -246,18 +272,45 @@ class TaigaService {
 
   async createIssue(issueData: IssueData): Promise<void> {
     try {
-      const description = await this.#formatIssueDescription(
-        issueData.description,
-        issueData.print,
-        issueData.trackInfo
-      );
-
-      await this.taigaClient<IssueResponse>("/issues", {
+      const response = await this.taigaClient<IssueResponse>("/issues", {
         method: HttpMethodsEnum.POST,
         body: JSON.stringify({
           subject: issueData.subject,
-          description: description,
           project: issueData.project,
+        }),
+      });
+
+      const attachmentContent = new FormData();
+
+      attachmentContent.append("object_id", response.data.id.toString());
+      attachmentContent.append("project", issueData.project);
+      attachmentContent.append(
+        "attached_file",
+        base64ToFile(issueData.print, "screenshot.png")
+      );
+
+      const attachment = await this.taigaClient<AttachmentResponse>(
+        "/issues/attachments",
+        {
+          method: HttpMethodsEnum.POST,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          body: attachmentContent,
+        }
+      );
+
+      const description = await this.#formatIssueDescription(
+        issueData.description,
+        attachment.data.url,
+        issueData.trackInfo
+      );
+
+      await this.taigaClient<IssueResponse>(`/issues/${response.data.id}`, {
+        method: HttpMethodsEnum.PATCH,
+        body: JSON.stringify({
+          description: description,
+          version: 1,
         }),
       });
     } catch (error) {
