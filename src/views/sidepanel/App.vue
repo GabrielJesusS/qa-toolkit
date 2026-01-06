@@ -7,7 +7,7 @@ import Home from '@/components/sections/Home.vue';
 
 <template>
   <TaigaSettingsProvider>
-    <ConfigProvider>
+    <ConfigProvider lazy>
       <Home />
       <template v-slot:loading>
         <LoadingScreen />

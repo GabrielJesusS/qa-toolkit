@@ -1,6 +1,7 @@
 import { ConfigCTXKey } from "@/contexts/ConfigContext";
 import { browserClient } from "@/core/BrowserClient";
 import { HandlerMapEnum } from "@/core/enums/HandlerMapEnum";
+import { StorageKeyEnum } from "@/core/enums/StorageKeyEnum";
 import { AppConfigSchema } from "@/schemas/settings/app-config";
 import { parseAsync } from "valibot";
 import { onMounted, provide, ref, watch } from "vue";
@@ -20,7 +21,9 @@ const check = async () => {
 };
 
 export function useConfigProvider() {
-  const hasLoaded = ref(false);
+  const isLoading = ref(true);
+
+  const hasLoadedData = ref(false);
 
   const appConfig = ref<AppConfigSchema>({
     setup: false,
@@ -42,7 +45,7 @@ export function useConfigProvider() {
   }
 
   watch(appConfig, async (newConfig) => {
-    if (hasLoaded.value) {
+    if (hasLoadedData.value) {
       await browserClient.sendMessage({
         type: HandlerMapEnum.SET_APP_CONFIG,
         data: newConfig,
@@ -50,13 +53,21 @@ export function useConfigProvider() {
       return;
     }
 
-    hasLoaded.value = true;
+    hasLoadedData.value = true;
   });
 
   onMounted(async () => {
-    if (!hasLoaded.value) {
+    if (!hasLoadedData.value) {
       appConfig.value = await check();
+      isLoading.value = false;
     }
+
+    chrome.storage.local.onChanged.addListener(async (content) => {
+      if (content[StorageKeyEnum.APP_CONFIG]) {
+        hasLoadedData.value = false;
+        appConfig.value = await check();
+      }
+    });
   });
 
   provide(ConfigCTXKey, {
@@ -66,6 +77,6 @@ export function useConfigProvider() {
   });
 
   return {
-    hasLoaded,
+    isLoading,
   };
 }

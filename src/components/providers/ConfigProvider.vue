@@ -2,13 +2,19 @@
 import { useConfigProvider } from '@/composables/useConfigProvider';
 import { Transition } from 'vue';
 
-const { hasLoaded } = useConfigProvider();
+type Props = {
+    lazy?: boolean;
+}
+
+const { isLoading } = useConfigProvider();
+
+const props = defineProps<Props>();
 
 </script>
 
 <template>
     <transition name="fade" mode="out-in">
-        <slot v-if="hasLoaded" />
-        <slot name="loading" v-else />
+        <slot name="loading" v-if="isLoading && props.lazy" />
+        <slot v-else />
     </transition>
 </template>
