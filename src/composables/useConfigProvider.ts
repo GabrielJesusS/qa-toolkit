@@ -3,7 +3,11 @@ import { browserClient } from "@/core/BrowserClient";
 import { HandlerMapEnum } from "@/core/enums/HandlerMapEnum";
 import { AppConfigSchema } from "@/schemas/settings/app-config";
 import { parseAsync } from "valibot";
-import { onMounted, provide, ref } from "vue";
+import { onMounted, provide, ref, watch } from "vue";
+
+type SetterValue =
+  | AppConfigSchema
+  | ((oldConfig: AppConfigSchema) => AppConfigSchema);
 
 const check = async () => {
   const result = await browserClient.sendMessage({
@@ -18,27 +22,50 @@ const check = async () => {
 export function useConfigProvider() {
   const hasLoaded = ref(false);
 
-  const appConfig = ref({
+  const appConfig = ref<AppConfigSchema>({
     setup: false,
+    sendNetwork: false,
     provider: "",
   });
 
-  function resetSetup() {
-    appConfig.value = { setup: false, provider: "" };
+  function setConfig(value: SetterValue) {
+    if (typeof value === "function") {
+      appConfig.value = value(appConfig.value);
+      return;
+    }
+
+    appConfig.value = value;
   }
+
+  function resetSetup() {
+    setConfig({ setup: false, provider: "" });
+  }
+
+  watch(appConfig, async (newConfig) => {
+    if (hasLoaded.value) {
+      await browserClient.sendMessage({
+        type: HandlerMapEnum.SET_APP_CONFIG,
+        data: newConfig,
+      });
+
+      console.log("SENDED DATA");
+      return;
+    }
+
+    console.log("LOADED DATA");
+    hasLoaded.value = true;
+  });
 
   onMounted(async () => {
     if (!hasLoaded.value) {
       appConfig.value = await check();
-      hasLoaded.value = true;
     }
   });
-
-  appConfig;
 
   provide(ConfigCTXKey, {
     config: appConfig,
     resetSetup,
+    setConfig,
   });
 
   return {
