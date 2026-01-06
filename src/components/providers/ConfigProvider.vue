@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { useConfigProvider } from '@/composables/useConfigProvider';
+import LoadingScreen from '../LoadingScreen.vue';
+import { Transition } from 'vue';
 
 const { hasLoaded } = useConfigProvider();
 
 </script>
 
 <template>
-    <slot v-if="hasLoaded" />
-    <div v-else>
-        Loading...
-    </div>
+    <transition name="fade" mode="out-in">
+        <slot v-if="hasLoaded" />
+        <loading-screen v-else />
+    </transition>
 </template>
