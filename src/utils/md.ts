@@ -6,9 +6,9 @@ export async function generateMarkdownFromIssue(
 ): Promise<string> {
   let content = "";
 
-  content += `![${issue.subject} screenshot](${issue.print}) \n`;
+  content += `${issue.description} \n\n`;
 
-  content += `${issue.description} \n`;
+  content += `![${issue.subject} screenshot](${issue.print}) \n`;
 
   if (issue.trackInfo && issue.trackInfo.length > 0) {
     content += "## Tracked Network Requests: \n";
