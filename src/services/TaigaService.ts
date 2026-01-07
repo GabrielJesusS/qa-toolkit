@@ -4,10 +4,10 @@ import { HTTPError } from "@/core/HttpClient/HttpError";
 import { HttpMethodsEnum } from "@/core/HttpClient/HttpMethodsEnum";
 import HttpStatusCode from "@/core/HttpClient/HttpStatusCodeEnum";
 import { StorageController } from "@/core/StorageController";
-import { TrackInfo } from "@/core/types/TrackInfo";
+import { IssueData } from "@/core/types/IssueData";
 import { TaigaAuthSchema } from "@/schemas/taiga-auth";
 import { base64ToFile } from "@/utils/file";
-import { formatUrl } from "@/utils/url";
+import { generateMarkdownFromIssue } from "@/utils/md";
 
 type TaigaTokenResponse = {
   refresh: string;
@@ -26,14 +26,6 @@ type TaigaProjectResponse = {
 type ProjectResponse = {
   id: string;
   name: string;
-};
-
-type IssueData = {
-  subject: string;
-  description: string;
-  print: string;
-  project: string;
-  trackInfo?: TrackInfo[];
 };
 
 type TaigaClientOptions = {
@@ -210,38 +202,6 @@ class TaigaService {
     }
   }
 
-  async #formatIssueDescription(
-    description: string,
-    print: string,
-    trackInfo?: TrackInfo[]
-  ) {
-    let content = "";
-
-    content += `![](${print}) \n`;
-
-    content += `${description} \n`;
-
-    if (trackInfo && trackInfo.length > 0) {
-      content += "## Tracked Network Requests: \n";
-
-      content += "| Resource | Origin | Code | Requested At | \n";
-
-      content += "| --- | --- | --- | --- | \n";
-
-      trackInfo.forEach((track) => {
-        const date = new Date(track.createdAt);
-
-        content += `| ${formatUrl(track.url)} | ${formatUrl(track.origin)} | ${
-          track.code
-        } | ${date.toLocaleString()} | \n`;
-      });
-    }
-
-    content += `_**Issue created via QA Toolkit**_`;
-
-    return content;
-  }
-
   async initIssue(issueData: IssueData): Promise<IssueResponse> {
     try {
       const response = await this.taigaClient<IssueResponse>("/issues", {
@@ -295,11 +255,10 @@ class TaigaService {
     attachment: AttachmentResponse
   ) {
     try {
-      const description = await this.#formatIssueDescription(
-        issueData.description,
-        attachment.url,
-        issueData.trackInfo
-      );
+      const description = await generateMarkdownFromIssue({
+        ...issueData,
+        print: attachment.url,
+      });
 
       await this.taigaClient<IssueResponse>(`/issues/${issueId}`, {
         method: HttpMethodsEnum.PATCH,
