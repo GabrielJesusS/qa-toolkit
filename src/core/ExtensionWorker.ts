@@ -14,8 +14,8 @@ export class ExtensionWorker {
   }
 
   #setMessageListener() {
-    chrome.runtime.onMessage.addListener((...x) => {
-      messageController.handleMessage(...x);
+    chrome.runtime.onMessage.addListener((...message) => {
+      messageController.handleMessage(...message);
       return true;
     });
   }
