@@ -6,6 +6,8 @@ import HttpStatusCode from "@/core/HttpClient/HttpStatusCodeEnum";
 import { StorageController } from "@/core/StorageController";
 import { TrackInfo } from "@/core/types/TrackInfo";
 import { TaigaAuthSchema } from "@/schemas/taiga-auth";
+import { base64ToFile } from "@/utils/file";
+import { formatUrl } from "@/utils/url";
 
 type TaigaTokenResponse = {
   refresh: string;
@@ -45,36 +47,6 @@ type IssueResponse = {
 type AttachmentResponse = {
   url: string;
 };
-
-const truncateUrl = (url: string, max = 60) => {
-  if (url.length <= max) return url;
-
-  return `${url.slice(0, 35)}…${url.slice(-15)}`;
-};
-
-const formatUrl = (url: string) => `[${truncateUrl(url)}](${url})`;
-
-function base64ToFile(
-  base64: string,
-  fileName: string,
-  mimeType?: string
-): File {
-  const [header, data] = base64.split(",");
-  const mime =
-    mimeType ??
-    header?.match(/data:(.*?);base64/)?.[1] ??
-    "application/octet-stream";
-
-  const binary = atob(data);
-  const len = binary.length;
-  const bytes = new Uint8Array(len);
-
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-
-  return new File([bytes], fileName, { type: mime });
-}
 
 const MAX_RETRIES = 2;
 
