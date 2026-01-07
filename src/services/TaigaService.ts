@@ -5,6 +5,8 @@ import { HttpMethodsEnum } from "@/core/HttpClient/HttpMethodsEnum";
 import HttpStatusCode from "@/core/HttpClient/HttpStatusCodeEnum";
 import { StorageController } from "@/core/StorageController";
 import { IssueData } from "@/core/types/IssueData";
+import { IssueProviderService } from "@/infra/IssueProviderService";
+import { ProjectsSchema } from "@/schemas/project";
 import { TaigaAuthSchema } from "@/schemas/taiga-auth";
 import { base64ToFile } from "@/utils/file";
 import { generateMarkdownFromIssue } from "@/utils/md";
@@ -20,11 +22,6 @@ type SignInResponse = {
 
 type TaigaProjectResponse = {
   id: number;
-  name: string;
-};
-
-type ProjectResponse = {
-  id: string;
   name: string;
 };
 
@@ -46,7 +43,7 @@ const CACHE_INTERVAL = 2 * 60 * 60 * 1000; // 2 hours
 
 const CACHE = new Map<string, { timestamp: number; data: unknown }>();
 
-class TaigaService {
+class TaigaService implements IssueProviderService {
   static readonly baseUrl = "https://api.taiga.io/api/v1";
 
   static #refresh: null | Promise<boolean> = null;
@@ -299,7 +296,7 @@ class TaigaService {
     }
   }
 
-  async listProjects(): Promise<ProjectResponse[]> {
+  async listProjects(): Promise<ProjectsSchema> {
     try {
       const tokens = await this.getAuth();
 
