@@ -1,6 +1,7 @@
 import { browserClient } from "@/core/BrowserClient";
 import { HandlerMapEnum } from "@/core/enums/HandlerMapEnum";
 import { ScreenshotSchema } from "@/schemas/screenshot";
+import { sleep } from "@/utils/sleep";
 import { parseAsync } from "valibot";
 import { ref } from "vue";
 
@@ -23,6 +24,8 @@ export function useScreenshot() {
         type: HandlerMapEnum.TAKE_SCREENSHOT,
         data: {},
       });
+
+      await sleep(500);
 
       const parsed = await parseAsync(ScreenshotSchema, result);
 
