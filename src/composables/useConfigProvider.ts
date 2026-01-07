@@ -63,7 +63,7 @@ export function useConfigProvider() {
     }
 
     chrome.storage.local.onChanged.addListener(async (content) => {
-      if (content[StorageKeyEnum.APP_CONFIG]) {
+      if (typeof content[StorageKeyEnum.APP_CONFIG] !== "undefined") {
         hasLoadedData.value = false;
         appConfig.value = await getAppConfig();
       }
