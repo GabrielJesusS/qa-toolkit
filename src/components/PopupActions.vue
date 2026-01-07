@@ -4,6 +4,7 @@ import Capture from "@/assets/capture.svg?component";
 import { useConfig } from "@/composables/useConfig";
 import clsx from "clsx";
 import IconButton from "./IconButton.vue";
+import { getURLDomain } from "@/utils/url";
 
 const { setConfig, config } = useConfig()
 
@@ -44,7 +45,7 @@ async function toggleURLCapture() {
 
     if (!tab.id) return;
 
-    const TRACK_URL = tab.url?.match(/^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)/igm)?.[0];
+    const TRACK_URL = getURLDomain(tab.url)
 
     if (!TRACK_URL) return
 
