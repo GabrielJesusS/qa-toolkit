@@ -53,12 +53,16 @@ async function toggleURLCapture() {
 </script>
 
 <template>
-    <div class="qtk:flex qtk:gap-4 qtk:items-center qtk:justify-between">
-        <div class="qtk:flex qtk:gap-4 qtk:items-center">
+    <div
+        :class="clsx('qtk:flex qtk:gap-4 qtk:items-center', config.setup ? ' qtk:justify-between' : ' qtk:justify-end')">
+        <div v-if="config.setup" class="qtk:flex qtk:gap-4 qtk:items-center">
             <button @click="toggleURLCapture" type="button"
                 :class="clsx('qtk:p-2 qtk:rounded-full qtk:transition-all qtk:duration-75 qtk:ease-in qtk:cursor-pointer qtk:active:bg-primary-dark qtk:active:text-white', config.urlTrack ? 'qtk:bg-red-600 qtk:text-white qtk:animate-pulse' : 'qtk:bg-gray-100 qtk:text-gray-400')">
                 <Capture class="qtk:size-6" />
             </button>
+        </div>
+        <div v-else class="qtk:grow">
+            <span class="qtk:text-gray-500 qtk:text-sm">Please complete the setup first -></span>
         </div>
         <button @click="openSettings" type="button"
             class="qtk:p-2 qtk:bg-gray-100 qtk:rounded-full qtk:transition-all qtk:duration-75 qtk:ease-in qtk:text-gray-400 qtk:cursor-pointer qtk:active:bg-primary-dark qtk:active:text-white">
