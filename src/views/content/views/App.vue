@@ -35,7 +35,7 @@ const hasScreenshot = computed(() => {
     <ConfigProvider>
       <div data-qtk-anchor :class="clsx('qtk:fixed qtk:z-99999 qtk:gap-4 qtk:right-0 qtk:bottom-0 qtk:font-bold qtk:flex qtk:flex-col qtk:items-end qtk:m-5',
         {
-          'qtk:opacity-0': !!screenshot.screenshotState.value.isLoading
+          'qtk:opacity-0 qtk:pointer-events-none': !!screenshot.screenshotState.value.isLoading
         })">
         <Transition mode="out-in" name="slide-fade">
           <div v-show="hasScreenshot" class="qtk:transition-opacity qtk:duration-300 qtk:max-w-xs qtk:overflow-hidden"
