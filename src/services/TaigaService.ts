@@ -242,7 +242,7 @@ class TaigaService {
     return content;
   }
 
-  async createIssue(issueData: IssueData): Promise<void> {
+  async initIssue(issueData: IssueData): Promise<IssueResponse> {
     try {
       const response = await this.taigaClient<IssueResponse>("/issues", {
         method: HttpMethodsEnum.POST,
@@ -252,9 +252,20 @@ class TaigaService {
         }),
       });
 
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to create issue in Taiga: ${error}`);
+    }
+  }
+
+  async createScreenshotAttachment(
+    issueId: IssueResponse["id"],
+    issueData: IssueData
+  ): Promise<AttachmentResponse> {
+    try {
       const attachmentContent = new FormData();
 
-      attachmentContent.append("object_id", response.data.id.toString());
+      attachmentContent.append("object_id", issueId.toString());
       attachmentContent.append("project", issueData.project);
       attachmentContent.append(
         "attached_file",
@@ -272,19 +283,46 @@ class TaigaService {
         }
       );
 
+      return attachment.data;
+    } catch (error) {
+      throw new Error(`Failed to create attachment in Taiga issue: ${error}`);
+    }
+  }
+
+  async insertIssueDescription(
+    issueId: IssueResponse["id"],
+    issueData: IssueData,
+    attachment: AttachmentResponse
+  ) {
+    try {
       const description = await this.#formatIssueDescription(
         issueData.description,
-        attachment.data.url,
+        attachment.url,
         issueData.trackInfo
       );
 
-      await this.taigaClient<IssueResponse>(`/issues/${response.data.id}`, {
+      await this.taigaClient<IssueResponse>(`/issues/${issueId}`, {
         method: HttpMethodsEnum.PATCH,
         body: JSON.stringify({
           description: description,
           version: 1,
         }),
       });
+    } catch (error) {
+      throw new Error(`Failed to update issue description in Taiga: ${error}`);
+    }
+  }
+
+  async createIssue(issueData: IssueData): Promise<void> {
+    try {
+      const response = await this.initIssue(issueData);
+
+      const attachment = await this.createScreenshotAttachment(
+        response.id,
+        issueData
+      );
+
+      await this.insertIssueDescription(response.id, issueData, attachment);
     } catch (error) {
       throw new Error(`Failed to create issue in Taiga: ${error}`);
     }
