@@ -2,7 +2,13 @@
 import { Transition } from 'vue';
 import { useSetupWizardProvider } from '@/composables/useSetupWizardProvider';
 
-const { step } = useSetupWizardProvider();
+type Props = {
+    initialStep?: number;
+};
+
+const props = defineProps<Props>();
+
+const { step } = useSetupWizardProvider(props);
 
 </script>
 

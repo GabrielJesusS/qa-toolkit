@@ -1,7 +1,7 @@
 import { computed, ref } from "vue";
 
-export function useStepper(maxSteps = 3) {
-  const step = ref(1);
+export function useStepper(maxSteps = 3, initialStep = 1) {
+  const step = ref(initialStep);
 
   const reachLimit = computed(() => ({
     end: step.value >= maxSteps,
