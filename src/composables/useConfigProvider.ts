@@ -10,7 +10,7 @@ type SetterValue =
   | AppConfigSchema
   | ((oldConfig: AppConfigSchema) => AppConfigSchema);
 
-const check = async () => {
+const getAppConfig = async () => {
   const result = await browserClient.sendMessage({
     type: HandlerMapEnum.GET_APP_CONFIG,
   });
@@ -41,7 +41,7 @@ export function useConfigProvider() {
   }
 
   function resetSetup() {
-    setConfig({ setup: false, provider: "" });
+    setConfig({ setup: false, provider: "", sendNetwork: false, urlTrack: "" });
   }
 
   watch(appConfig, async (newConfig) => {
@@ -58,14 +58,14 @@ export function useConfigProvider() {
 
   onMounted(async () => {
     if (!hasLoadedData.value) {
-      appConfig.value = await check();
+      appConfig.value = await getAppConfig();
       isLoading.value = false;
     }
 
     chrome.storage.local.onChanged.addListener(async (content) => {
       if (content[StorageKeyEnum.APP_CONFIG]) {
         hasLoadedData.value = false;
-        appConfig.value = await check();
+        appConfig.value = await getAppConfig();
       }
     });
   });
