@@ -26,7 +26,7 @@ const { value: email } = useField<string>('email');
 const { value: password } = useField<string>('password');
 
 const { wizardActions } = useSetupWizard();
-const { config } = useConfig();
+const { setConfig } = useConfig();
 
 
 const onSubmit = handleSubmit(async values => {
@@ -38,15 +38,9 @@ const onSubmit = handleSubmit(async values => {
         }
     })
 
-    await browserClient.sendMessage({
-        type: HandlerMapEnum.SET_APP_CONFIG,
-        data: {
-            ...config.value,
-            provider: 'taiga'
-        }
-    });
-
-    config.value.provider = 'taiga';
+    setConfig((old) => ({
+        ...old, provider: 'taiga'
+    }))
 
     wizardActions?.nextStep();
 });
