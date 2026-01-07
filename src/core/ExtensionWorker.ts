@@ -20,6 +20,18 @@ export class ExtensionWorker {
     });
   }
 
+  #setDefaultStorages() {
+    try {
+      StorageController.get(StorageKeyEnum.APP_CONFIG, AppConfigSchema);
+    } catch (error) {
+      StorageController.set(StorageKeyEnum.APP_CONFIG, {
+        provider: "",
+        sendNetwork: false,
+        setup: false,
+      });
+    }
+  }
+
   #setRequestListener() {
     chrome.webRequest.onCompleted.addListener(
       async (details) => {
@@ -63,6 +75,7 @@ export class ExtensionWorker {
   }
 
   init() {
+    this.#setDefaultStorages();
     this.#setRequestListener();
     this.#setMessageListener();
   }
