@@ -20,7 +20,7 @@ export class ExtensionWorker {
     });
   }
 
-  #setDefaultStorages() {
+  async #setDefaultStorages() {
     try {
       StorageController.get(StorageKeyEnum.APP_CONFIG, AppConfigSchema);
     } catch (error) {
@@ -74,8 +74,8 @@ export class ExtensionWorker {
     );
   }
 
-  init() {
-    this.#setDefaultStorages();
+  async init() {
+    await this.#setDefaultStorages();
     this.#setRequestListener();
     this.#setMessageListener();
   }
