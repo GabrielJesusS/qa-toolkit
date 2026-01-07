@@ -67,8 +67,6 @@ export async function client<T>(
 ): Promise<HTTPClientExecutionReturn<T>> {
   const headers = mountHeader(options?.headers);
 
-  console.log(headers.get('Content-Type'));
-
   const response = await fetch(url, {
     ...options,
     headers,
