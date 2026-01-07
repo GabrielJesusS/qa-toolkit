@@ -35,7 +35,9 @@ export async function GetAppConfigHandler(message: unknown) {
 
     return { ...DEFAULT_SETTINGS, ...appConfig };
   } catch (error) {
-    console.error("Provider setup check failed:", error);
+    await StorageController.set(StorageKeyEnum.APP_CONFIG, {
+      ...DEFAULT_SETTINGS,
+    });
 
     return DEFAULT_SETTINGS;
   }
