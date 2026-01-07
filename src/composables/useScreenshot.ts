@@ -20,6 +20,8 @@ export function useScreenshot() {
     try {
       screenshotState.value.isLoading = true;
 
+      await sleep(500);
+
       const result = await browserClient.sendMessage({
         type: HandlerMapEnum.TAKE_SCREENSHOT,
         data: {},
