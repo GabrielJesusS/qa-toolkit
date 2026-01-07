@@ -18,7 +18,6 @@ const getSettings = async () => {
   const parsed = await safeParseAsync(TaigaSettingsSchema, result);
 
   if (!parsed.success) {
-    console.error("Failed to parse Taiga settings:", parsed.issues);
     return {
       defaultProjectId: "",
       defaultProjectName: "",

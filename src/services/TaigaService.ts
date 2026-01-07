@@ -57,7 +57,6 @@ class TaigaService implements IssueProviderService {
         TaigaAuthSchema
       );
     } catch (error) {
-      console.error(error);
       return null;
     }
   }
