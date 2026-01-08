@@ -5,7 +5,7 @@ import { AppConfigSchema } from "@/schemas/settings/app-config";
 import { TaigaService } from "@/services/TaigaService";
 import { parseAsync } from "valibot";
 
-const DEFAULT_SETTINGS = {
+const DEFAULT_SETTINGS: AppConfigSchema = {
   setup: false,
   provider: "",
 };
@@ -35,10 +35,11 @@ export async function GetAppConfigHandler(message: unknown) {
 
     return { ...DEFAULT_SETTINGS, ...appConfig };
   } catch (error) {
-    await StorageController.set(StorageKeyEnum.APP_CONFIG, {
-      ...DEFAULT_SETTINGS,
-    });
+    await StorageController.set(
+      StorageKeyEnum.APP_CONFIG,
+      structuredClone(DEFAULT_SETTINGS)
+    );
 
-    return DEFAULT_SETTINGS;
+    return structuredClone(DEFAULT_SETTINGS);
   }
 }
