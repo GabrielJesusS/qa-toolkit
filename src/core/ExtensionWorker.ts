@@ -69,8 +69,10 @@ export class ExtensionWorker {
         }
       },
       {
+        types: ["xmlhttprequest", "main_frame"],
         urls: ["<all_urls>"],
-      }
+      },
+      ["responseHeaders"]
     );
   }
 
