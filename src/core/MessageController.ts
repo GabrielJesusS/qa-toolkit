@@ -30,7 +30,6 @@ class MessageController {
       const parsedMessage = safeParse(BaseMessage, message);
 
       if (!parsedMessage.success) {
-        console.error("Invalid message received:", parsedMessage.issues);
         sendResponse({
           ok: false,
           error: `Invalid \n SendedData: ${JSON.stringify(
@@ -58,7 +57,6 @@ class MessageController {
         error: `Invalid action: ${parsedMessage.output.type} - This action is not implemented yet or is not registered.`,
       });
     } catch (error) {
-      console.error("Error processing message:", error);
       sendResponse({
         ok: false,
         error: `Error processing message: ${

@@ -18,7 +18,6 @@ const getSettings = async () => {
   const parsed = await safeParseAsync(TaigaSettingsSchema, result);
 
   if (!parsed.success) {
-    console.error("Failed to parse Taiga settings:", parsed.issues);
     return {
       defaultProjectId: "",
       defaultProjectName: "",
@@ -51,7 +50,7 @@ export const useTaigaSettingsProvider = () => {
     }
 
     chrome.storage.local.onChanged.addListener(async (content) => {
-      if (content[StorageKeyEnum.TAIGA_SETTINGS]) {
+      if (typeof content[StorageKeyEnum.TAIGA_SETTINGS] !== "undefined") {
         hasLoadedData.value = false;
         taigaSettings.value = await getSettings();
       }

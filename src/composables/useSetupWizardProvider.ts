@@ -2,8 +2,12 @@ import { provide, ref } from "vue";
 import { useStepper } from "./useStepper";
 import { WizardCTXKey } from "@/contexts/WizardContext";
 
-export function useSetupWizardProvider() {
-  const { nextStep, prevStep, resetStepper, step } = useStepper();
+type UseSetupWizardParams = {
+  initialStep?: number;
+};
+
+export function useSetupWizardProvider(params: UseSetupWizardParams = {}) {
+  const { nextStep, prevStep, resetStepper, step } = useStepper(3, params.initialStep || 1);
 
   const wizardState = ref({
     provider: "",

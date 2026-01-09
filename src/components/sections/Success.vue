@@ -5,11 +5,13 @@ import { useSetupWizard } from "@/composables/useSetupWizard";
 import { useConfig } from "@/composables/useConfig";
 
 const { wizardActions } = useSetupWizard();
-const { config } = useConfig();
+const { setConfig } = useConfig();
 
 const onFinish = () => {
     wizardActions.finishWizard();
-    config.value.setup = true
+    setConfig((old) => ({
+        ...old, setup: true
+    }))
 }
 
 </script>

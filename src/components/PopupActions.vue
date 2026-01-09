@@ -3,6 +3,8 @@ import CogIcon from "@/assets/cog.svg?component";
 import Capture from "@/assets/capture.svg?component";
 import { useConfig } from "@/composables/useConfig";
 import clsx from "clsx";
+import IconButton from "./IconButton.vue";
+import { getURLDomain } from "@/utils/url";
 
 const { setConfig, config } = useConfig()
 
@@ -43,7 +45,7 @@ async function toggleURLCapture() {
 
     if (!tab.id) return;
 
-    const TRACK_URL = tab.url?.match(/^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)/igm)?.[0];
+    const TRACK_URL = getURLDomain(tab.url)
 
     if (!TRACK_URL) return
 
@@ -56,17 +58,15 @@ async function toggleURLCapture() {
     <div
         :class="clsx('qtk:flex qtk:gap-4 qtk:items-center', config.setup ? ' qtk:justify-between' : ' qtk:justify-end')">
         <div v-if="config.setup" class="qtk:flex qtk:gap-4 qtk:items-center">
-            <button @click="toggleURLCapture" type="button"
-                :class="clsx('qtk:p-2 qtk:rounded-full qtk:transition-all qtk:duration-75 qtk:ease-in qtk:cursor-pointer qtk:active:bg-primary-dark qtk:active:text-white', config.urlTrack ? 'qtk:bg-red-600 qtk:text-white qtk:animate-pulse' : 'qtk:bg-gray-100 qtk:text-gray-400')">
+            <IconButton :active="!!config.urlTrack" @click="toggleURLCapture">
                 <Capture class="qtk:size-6" />
-            </button>
+            </IconButton>
         </div>
         <div v-else class="qtk:grow">
             <span class="qtk:text-gray-500 qtk:text-sm">Please complete the setup first -></span>
         </div>
-        <button @click="openSettings" type="button"
-            class="qtk:p-2 qtk:bg-gray-100 qtk:rounded-full qtk:transition-all qtk:duration-75 qtk:ease-in qtk:text-gray-400 qtk:cursor-pointer qtk:active:bg-primary-dark qtk:active:text-white">
+        <IconButton @click="openSettings">
             <CogIcon class="qtk:size-6" />
-        </button>
+        </IconButton>
     </div>
 </template>

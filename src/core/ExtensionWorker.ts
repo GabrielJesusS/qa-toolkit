@@ -14,10 +14,22 @@ export class ExtensionWorker {
   }
 
   #setMessageListener() {
-    chrome.runtime.onMessage.addListener((...x) => {
-      messageController.handleMessage(...x);
+    chrome.runtime.onMessage.addListener((...message) => {
+      messageController.handleMessage(...message);
       return true;
     });
+  }
+
+  async #setDefaultStorages() {
+    try {
+      await StorageController.get(StorageKeyEnum.APP_CONFIG, AppConfigSchema);
+    } catch (error) {
+      await StorageController.set(StorageKeyEnum.APP_CONFIG, {
+        provider: "",
+        sendNetwork: false,
+        setup: false,
+      });
+    }
   }
 
   #setRequestListener() {
@@ -57,12 +69,15 @@ export class ExtensionWorker {
         }
       },
       {
+        types: ["xmlhttprequest", "main_frame"],
         urls: ["<all_urls>"],
-      }
+      },
+      ["responseHeaders"]
     );
   }
 
-  init() {
+  async init() {
+    await this.#setDefaultStorages();
     this.#setRequestListener();
     this.#setMessageListener();
   }

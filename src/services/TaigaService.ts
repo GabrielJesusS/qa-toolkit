@@ -4,8 +4,12 @@ import { HTTPError } from "@/core/HttpClient/HttpError";
 import { HttpMethodsEnum } from "@/core/HttpClient/HttpMethodsEnum";
 import HttpStatusCode from "@/core/HttpClient/HttpStatusCodeEnum";
 import { StorageController } from "@/core/StorageController";
-import { TrackInfo } from "@/core/types/TrackInfo";
+import { IssueData } from "@/core/types/IssueData";
+import { IssueProviderService } from "@/infra/IssueProviderService";
+import { ProjectsSchema } from "@/schemas/project";
 import { TaigaAuthSchema } from "@/schemas/taiga-auth";
+import { base64ToFile } from "@/utils/file";
+import { generateMarkdownFromIssue } from "@/utils/md";
 
 type TaigaTokenResponse = {
   refresh: string;
@@ -21,19 +25,6 @@ type TaigaProjectResponse = {
   name: string;
 };
 
-type ProjectResponse = {
-  id: string;
-  name: string;
-};
-
-type IssueData = {
-  subject: string;
-  description: string;
-  print: string;
-  project: string;
-  trackInfo?: TrackInfo[];
-};
-
 type TaigaClientOptions = {
   auth?: boolean;
 } & Parameters<typeof client>[1];
@@ -46,43 +37,13 @@ type AttachmentResponse = {
   url: string;
 };
 
-const truncateUrl = (url: string, max = 60) => {
-  if (url.length <= max) return url;
-
-  return `${url.slice(0, 35)}…${url.slice(-15)}`;
-};
-
-const formatUrl = (url: string) => `[${truncateUrl(url)}](${url})`;
-
-function base64ToFile(
-  base64: string,
-  fileName: string,
-  mimeType?: string
-): File {
-  const [header, data] = base64.split(",");
-  const mime =
-    mimeType ??
-    header?.match(/data:(.*?);base64/)?.[1] ??
-    "application/octet-stream";
-
-  const binary = atob(data);
-  const len = binary.length;
-  const bytes = new Uint8Array(len);
-
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-
-  return new File([bytes], fileName, { type: mime });
-}
-
 const MAX_RETRIES = 2;
 
 const CACHE_INTERVAL = 2 * 60 * 60 * 1000; // 2 hours
 
 const CACHE = new Map<string, { timestamp: number; data: unknown }>();
 
-class TaigaService {
+class TaigaService implements IssueProviderService {
   static readonly baseUrl = "https://api.taiga.io/api/v1";
 
   static #refresh: null | Promise<boolean> = null;
@@ -96,7 +57,6 @@ class TaigaService {
         TaigaAuthSchema
       );
     } catch (error) {
-      console.error(error);
       return null;
     }
   }
@@ -238,39 +198,7 @@ class TaigaService {
     }
   }
 
-  async #formatIssueDescription(
-    description: string,
-    print: string,
-    trackInfo?: TrackInfo[]
-  ) {
-    let content = "";
-
-    content += `![](${print}) \n`;
-
-    content += `${description} \n`;
-
-    if (trackInfo && trackInfo.length > 0) {
-      content += "## Tracked Network Requests: \n";
-
-      content += "| Resource | Origin | Code | Requested At | \n";
-
-      content += "| --- | --- | --- | --- | \n";
-
-      trackInfo.forEach((track) => {
-        const date = new Date(track.createdAt);
-
-        content += `| ${formatUrl(track.url)} | ${formatUrl(track.origin)} | ${
-          track.code
-        } | ${date.toLocaleString()} | \n`;
-      });
-    }
-
-    content += `_**Issue created via QA Toolkit**_`;
-
-    return content;
-  }
-
-  async createIssue(issueData: IssueData): Promise<void> {
+  async initIssue(issueData: IssueData): Promise<IssueResponse> {
     try {
       const response = await this.taigaClient<IssueResponse>("/issues", {
         method: HttpMethodsEnum.POST,
@@ -280,9 +208,20 @@ class TaigaService {
         }),
       });
 
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to create issue in Taiga: ${error}`);
+    }
+  }
+
+  async createScreenshotAttachment(
+    issueId: IssueResponse["id"],
+    issueData: IssueData
+  ): Promise<AttachmentResponse> {
+    try {
       const attachmentContent = new FormData();
 
-      attachmentContent.append("object_id", response.data.id.toString());
+      attachmentContent.append("object_id", issueId.toString());
       attachmentContent.append("project", issueData.project);
       attachmentContent.append(
         "attached_file",
@@ -300,19 +239,45 @@ class TaigaService {
         }
       );
 
-      const description = await this.#formatIssueDescription(
-        issueData.description,
-        attachment.data.url,
-        issueData.trackInfo
-      );
+      return attachment.data;
+    } catch (error) {
+      throw new Error(`Failed to create attachment in Taiga issue: ${error}`);
+    }
+  }
 
-      await this.taigaClient<IssueResponse>(`/issues/${response.data.id}`, {
+  async insertIssueDescription(
+    issueId: IssueResponse["id"],
+    issueData: IssueData,
+    attachment: AttachmentResponse
+  ) {
+    try {
+      const description = await generateMarkdownFromIssue({
+        ...issueData,
+        print: attachment.url,
+      });
+
+      await this.taigaClient<IssueResponse>(`/issues/${issueId}`, {
         method: HttpMethodsEnum.PATCH,
         body: JSON.stringify({
           description: description,
           version: 1,
         }),
       });
+    } catch (error) {
+      throw new Error(`Failed to update issue description in Taiga: ${error}`);
+    }
+  }
+
+  async createIssue(issueData: IssueData): Promise<void> {
+    try {
+      const response = await this.initIssue(issueData);
+
+      const attachment = await this.createScreenshotAttachment(
+        response.id,
+        issueData
+      );
+
+      await this.insertIssueDescription(response.id, issueData, attachment);
     } catch (error) {
       throw new Error(`Failed to create issue in Taiga: ${error}`);
     }
@@ -330,7 +295,7 @@ class TaigaService {
     }
   }
 
-  async listProjects(): Promise<ProjectResponse[]> {
+  async listProjects(): Promise<ProjectsSchema> {
     try {
       const tokens = await this.getAuth();
 

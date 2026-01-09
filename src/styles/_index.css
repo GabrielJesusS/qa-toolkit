@@ -1,2 +1,10 @@
-@import "tailwindcss" prefix(qtk);
-@import "./base/_index.css"
+@layer theme, base, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme) prefix(qtk) important;
+/* @import "tailwindcss/preflight.css" layer(base); */
+@import "tailwindcss/utilities.css" layer(utilities) prefix(qtk) important;
+
+@layer base {
+  @import "./preflight.css";
+  @import "./base/_index.css";
+}

@@ -11,6 +11,7 @@ import { computed } from "vue";
 import { browserClient } from "@/core/BrowserClient";
 import { useSetupWizard } from "@/composables/useSetupWizard";
 import { useConfig } from "@/composables/useConfig";
+import clsx from "clsx";
 import { HandlerMapEnum } from "@/core/enums/HandlerMapEnum";
 
 
@@ -26,7 +27,7 @@ const { value: email } = useField<string>('email');
 const { value: password } = useField<string>('password');
 
 const { wizardActions } = useSetupWizard();
-const { config } = useConfig();
+const { setConfig } = useConfig();
 
 
 const onSubmit = handleSubmit(async values => {
@@ -38,15 +39,9 @@ const onSubmit = handleSubmit(async values => {
         }
     })
 
-    await browserClient.sendMessage({
-        type: HandlerMapEnum.SET_APP_CONFIG,
-        data: {
-            ...config.value,
-            provider: 'taiga'
-        }
-    });
-
-    config.value.provider = 'taiga';
+    setConfig((old) => ({
+        ...old, provider: 'taiga'
+    }))
 
     wizardActions?.nextStep();
 });
@@ -65,8 +60,9 @@ const hasPasswordError = computed(() => !!errors?.value.password);
         </div>
         <div class="qtk:text-lg md:qtk:text-xl qtk:text-gray-700 qtk:space-y-4 qtk:flex qtk:flex-col qtk:items-center">
             <h2 class="qtk:text-center">To setup taiga as your issue tracker, use your login credentials.</h2>
-            <form @submit="onSubmit"
-                class="qtk:space-y-4 qtk:max-w-2xs qtk:flex qtk:flex-col qtk:items-stretch qtk:w-full">
+            <form @submit="onSubmit" :class="clsx('qtk:space-y-4 qtk:max-w-2xs qtk:flex qtk:flex-col qtk:items-stretch qtk:w-full', {
+                'qtk:opacity-75 qtk:pointer-events-none': isSubmitting
+            })">
                 <div>
                     <Label for="taiga-email" required>Email</Label>
                     <Input id="taiga-email" :error="hasEmailError" v-model="email" type="email"
@@ -87,7 +83,7 @@ const hasPasswordError = computed(() => !!errors?.value.password);
 
 
             </form>
-            <Button @click="wizardActions?.prevStep" :loading="isSubmitting" type="submit" variant="ghost" size="sm">
+            <Button @click="wizardActions?.prevStep" :disabled="isSubmitting" type="button" variant="ghost" size="sm">
                 Back to Provider Selection
             </Button>
         </div>

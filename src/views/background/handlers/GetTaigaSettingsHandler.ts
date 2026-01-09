@@ -1,16 +1,26 @@
 import { StorageKeyEnum } from "@/core/enums/StorageKeyEnum";
 import { StorageController } from "@/core/StorageController";
-import { BaseMessage } from "@/schemas/base-message";
 import { TaigaSettingsSchema } from "@/schemas/settings/taiga-settings";
-import { parseAsync } from "valibot";
+
+const DEFAULT_SETTINGS: TaigaSettingsSchema = {
+  defaultProjectId: "",
+  defaultProjectName: "",
+};
 
 export async function GetTaigaSettingsHandler(message: unknown) {
-  await parseAsync(BaseMessage, message);
+  try {
+    const taigaSettings = await StorageController.get(
+      StorageKeyEnum.TAIGA_SETTINGS,
+      TaigaSettingsSchema
+    );
 
-  const taigaSettings = await StorageController.get(
-    StorageKeyEnum.TAIGA_SETTINGS,
-    TaigaSettingsSchema
-  );
+    return taigaSettings;
+  } catch (error) {
+    await StorageController.set(
+      StorageKeyEnum.TAIGA_SETTINGS,
+      structuredClone(DEFAULT_SETTINGS)
+    );
 
-  return taigaSettings;
+    return structuredClone(DEFAULT_SETTINGS);
+  }
 }

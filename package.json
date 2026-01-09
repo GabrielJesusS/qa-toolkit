@@ -1,8 +1,14 @@
 {
   "name": "qa-toolkit",
   "type": "module",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "private": true,
+  "description": "A browser extension to enhance your QA workflow.",
+  "author": {
+    "name": "Gabriel Jesus",
+    "email": "gabriel.ds.jesus@gmail.com",
+    "url": "https://github.com/GabrielJesusS"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build"

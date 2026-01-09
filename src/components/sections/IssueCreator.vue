@@ -14,9 +14,9 @@ const props = defineProps<Props>()
 
 <template>
     <section class="qtk:flex qtk:flex-col qtk:gap-3 qtk:text-gray-900">
-        <h1 class="qtk:font-semibold">
+        <h2 class="qtk:font-bold qtk:text-lg">
             Create issue
-        </h1>
+        </h2>
         <img :src="props.screenshot" alt="Screenshot of the issue" class="qtk:w-full qtk:rounded-md" />
         <TaigaSettingsProvider>
             <NewIssueForm :screenshot="props.screenshot" :onSuccess="props.onSuccess" />

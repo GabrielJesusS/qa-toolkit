@@ -4,6 +4,7 @@ import { ScreenshotSchema } from "@/schemas/screenshot";
 import { sleep } from "@/utils/sleep";
 import { parseAsync } from "valibot";
 import { ref } from "vue";
+import { useSnackbar } from "./useSnackbar";
 
 type ScreenshotState = {
   image: string | null;
@@ -11,6 +12,8 @@ type ScreenshotState = {
 };
 
 export function useScreenshot() {
+  const { notify } = useSnackbar();
+
   const screenshotState = ref<ScreenshotState>({
     image: null,
     isLoading: false,
@@ -33,7 +36,7 @@ export function useScreenshot() {
 
       screenshotState.value.image = parsed.screenshot;
     } catch (error) {
-      console.error(error);
+      notify("Failed to take screenshot.", "error");
     } finally {
       screenshotState.value.isLoading = false;
     }
