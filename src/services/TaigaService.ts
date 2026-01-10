@@ -1,6 +1,5 @@
 import { StorageKeyEnum } from "@/core/enums/StorageKeyEnum";
 import { client } from "@/core/HttpClient";
-import { HTTPError } from "@/core/HttpClient/HttpError";
 import { HttpMethodsEnum } from "@/core/HttpClient/HttpMethodsEnum";
 import HttpStatusCode from "@/core/HttpClient/HttpStatusCodeEnum";
 import { StorageController } from "@/core/StorageController";
@@ -10,6 +9,8 @@ import { ProjectsSchema } from "@/schemas/project";
 import { TaigaAuthSchema } from "@/schemas/taiga-auth";
 import { base64ToFile } from "@/utils/file";
 import { generateMarkdownFromIssue } from "@/utils/md";
+import { TaigaServiceError } from "./TaigaServiceError";
+import { handleRequestError } from "@/utils/error";
 
 type TaigaTokenResponse = {
   refresh: string;
@@ -79,6 +80,7 @@ class TaigaService implements IssueProviderService {
     return {};
   }
 
+  // Generic Taiga API client with automatic token revalidation
   async taigaClient<T>(
     path: `/${string}`,
     options?: TaigaClientOptions
@@ -110,13 +112,11 @@ class TaigaService implements IssueProviderService {
 
       return result;
     } catch (error) {
-      if (!(error instanceof HTTPError)) {
-        throw new Error(`Failed to connect to Taiga: ${error}`);
-      }
+      const parsedError = handleRequestError(error, "Taiga request failed");
 
       const tokens = await this.getAuth();
 
-      if (error.statusCode === HttpStatusCode.UNAUTHORIZED && tokens) {
+      if (parsedError.statusCode === HttpStatusCode.UNAUTHORIZED && tokens) {
         if (TaigaService.#retries >= MAX_RETRIES) {
           // await this.removeTokens();
           TaigaService.#retries = 0;
@@ -135,7 +135,7 @@ class TaigaService implements IssueProviderService {
         return await this.taigaClient<T>(path, options);
       }
 
-      throw new Error("Failed to connect to Taiga");
+      throw parsedError;
     } finally {
       TaigaService.#refresh = null;
     }
@@ -160,7 +160,8 @@ class TaigaService implements IssueProviderService {
 
       return true;
     } catch (error) {
-      throw new Error("Failed to sign in to Taiga");
+      const parsedError = handleRequestError(error, "Taiga sign-in failed");
+      throw new TaigaServiceError(parsedError.message, "SIGN_IN", error);
     }
   }
 
@@ -210,7 +211,11 @@ class TaigaService implements IssueProviderService {
 
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to create issue in Taiga: ${error}`);
+      const parsedError = handleRequestError(
+        error,
+        "Taiga issue initialization failed"
+      );
+      throw new TaigaServiceError(parsedError.message, "INIT_ISSUE", error);
     }
   }
 
@@ -241,7 +246,15 @@ class TaigaService implements IssueProviderService {
 
       return attachment.data;
     } catch (error) {
-      throw new Error(`Failed to create attachment in Taiga issue: ${error}`);
+      const parsedError = handleRequestError(
+        error,
+        "Taiga issue attachment failed"
+      );
+      throw new TaigaServiceError(
+        parsedError.message,
+        "CREATE_ATTACHMENT",
+        error
+      );
     }
   }
 
@@ -264,7 +277,15 @@ class TaigaService implements IssueProviderService {
         }),
       });
     } catch (error) {
-      throw new Error(`Failed to update issue description in Taiga: ${error}`);
+      const parsedError = handleRequestError(
+        error,
+        "Taiga issue description failed"
+      );
+      throw new TaigaServiceError(
+        parsedError.message,
+        "INSERT_DESCRIPTION",
+        error
+      );
     }
   }
 
@@ -279,7 +300,11 @@ class TaigaService implements IssueProviderService {
 
       await this.insertIssueDescription(response.id, issueData, attachment);
     } catch (error) {
-      throw new Error(`Failed to create issue in Taiga: ${error}`);
+      const parsedError = handleRequestError(
+        error,
+        "Taiga issue creation failed"
+      );
+      throw new TaigaServiceError(parsedError.message, "CREATE_ISSUE", error);
     }
   }
 
@@ -315,11 +340,11 @@ class TaigaService implements IssueProviderService {
         name: project.name,
       }));
     } catch (error) {
-      if (!(error instanceof HTTPError)) {
-        throw new Error(`Failed to connect to Taiga: ${error}`);
-      }
-
-      throw new Error(error.message);
+      const parsedError = handleRequestError(
+        error,
+        "Taiga project listing failed"
+      );
+      throw new TaigaServiceError(parsedError.message, "LIST_PROJECTS", error);
     }
   }
 }

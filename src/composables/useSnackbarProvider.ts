@@ -12,7 +12,8 @@ export const useSnackbarProvider = () => {
 
   const notify = (
     message: string,
-    type: "success" | "error" | "info" = "info"
+    type: "success" | "error" | "info" = "info",
+    duration: number = 3000
   ) => {
     const id = Date.now();
 
@@ -22,7 +23,7 @@ export const useSnackbarProvider = () => {
       notificationList.value = notificationList.value.filter(
         (n) => n.id !== id
       );
-    }, 3000);
+    }, duration);
   };
 
   provide(SnackbarCTXKey, {
