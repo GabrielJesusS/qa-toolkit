@@ -12,5 +12,5 @@ export function getURLDomain(url?: string) {
 }
 
 export function formatUrl(url: string) {
-  `[${truncateUrl(url)}](${url})`;
+  return `[${truncateUrl(url)}](${url})`;
 }

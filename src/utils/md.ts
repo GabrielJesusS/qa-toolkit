@@ -1,5 +1,6 @@
 import { IssueData } from "@/core/types/IssueData";
 import { formatUrl } from "./url";
+import { formatLocaleDate } from "./date";
 
 export async function generateMarkdownFromIssue(
   issue: IssueData
@@ -22,7 +23,7 @@ export async function generateMarkdownFromIssue(
 
       content += `| ${formatUrl(track.url)} | ${formatUrl(track.origin)} | ${
         track.code
-      } | ${date.toLocaleString()} | \n`;
+      } | ${formatLocaleDate(date, issue.locale)} | \n`;
     });
   }
 

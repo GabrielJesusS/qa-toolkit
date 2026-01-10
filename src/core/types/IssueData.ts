@@ -6,4 +6,5 @@ export type IssueData = {
   print: string;
   project: string;
   trackInfo?: TrackInfo[];
+  locale: string;
 };
