@@ -48,10 +48,6 @@ export class ExtensionWorker {
 
         if (!tabs || tabs.length === 0) return;
 
-        const activeTab = tabs[0];
-
-        if (details.tabId !== activeTab?.id) return;
-
         if (details.initiator?.includes(appConfig.urlTrack)) {
           Track.set(details.requestId, {
             url: details.url,
