@@ -14,6 +14,8 @@ export async function CreateIssueHandler(message: unknown) {
     AppConfigSchema
   );
 
+  const locale = chrome.i18n.getUILanguage();
+
   if (appConfig.provider === "taiga") {
     const taigaService = new TaigaService();
 
@@ -27,6 +29,7 @@ export async function CreateIssueHandler(message: unknown) {
       project: parsedMessage.data.projectId,
       print: parsedMessage.data.print,
       trackInfo: trackInfo,
+      locale: locale,
     });
   }
 }
