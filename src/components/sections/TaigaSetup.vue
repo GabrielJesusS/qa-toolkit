@@ -13,7 +13,7 @@ import { useSetupWizard } from "@/composables/useSetupWizard";
 import { useConfig } from "@/composables/useConfig";
 import clsx from "clsx";
 import { HandlerMapEnum } from "@/core/enums/HandlerMapEnum";
-
+import { useSnackbar } from "@/composables/useSnackbar";
 
 const { errors, isSubmitting, handleSubmit } = useForm({
     validationSchema: toTypedSchema(TaigaLoginSchema),
@@ -26,32 +26,35 @@ const { errors, isSubmitting, handleSubmit } = useForm({
 const { value: email } = useField<string>('email');
 const { value: password } = useField<string>('password');
 
+const { notify } = useSnackbar();
+
 const { wizardActions } = useSetupWizard();
 const { setConfig } = useConfig();
 
-
 const onSubmit = handleSubmit(async values => {
-    await browserClient.sendMessage({
-        type: HandlerMapEnum.TAIGA_SIGN_IN,
-        data: {
-            email: values.email,
-            password: values.password
-        }
-    })
+    try {
+        await browserClient.sendMessage({
+            type: HandlerMapEnum.TAIGA_SIGN_IN,
+            data: {
+                email: values.email,
+                password: values.password
+            }
+        })
 
-    setConfig((old) => ({
-        ...old, provider: 'taiga'
-    }))
+        setConfig((old) => ({
+            ...old, provider: 'taiga'
+        }))
 
-    wizardActions?.nextStep();
+        wizardActions?.nextStep();
+    } catch (error) {
+        notify('Sign in failed, try again.', 'error');
+    }
 });
 
 const hasEmailError = computed(() => !!errors?.value.email);
 const hasPasswordError = computed(() => !!errors?.value.password);
 
-
 </script>
-
 
 <template>
     <section class="qtk:py-20 qtk:px-5 md:qtk:px-20 lg:qtk:px-40 qtk:max-w-xl qtk:w-full qtk:mx-auto" id="home">

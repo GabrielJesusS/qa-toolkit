@@ -17,6 +17,6 @@ import SnackbarContainer from '@/components/SnackbarContainer.vue';
         </template>
       </ConfigProvider>
     </TaigaSettingsProvider>
-    <SnackbarContainer />
+    <SnackbarContainer position="top-right" :large="true" />
   </SnackbarProvider>
 </template>
