@@ -30,11 +30,23 @@ type TaigaClientOptions = {
   auth?: boolean;
 } & Parameters<typeof client>[1];
 
+type TaigaProjectExtraInfo = {
+  id: number;
+  name: string;
+  slug: string;
+};
+
 type IssueResponse = {
   id: number;
+  project_extra_info: TaigaProjectExtraInfo;
+  ref: number;
 };
 
 type AttachmentResponse = {
+  url: string;
+};
+
+type IssueReturn = {
   url: string;
 };
 
@@ -46,6 +58,8 @@ const CACHE = new Map<string, { timestamp: number; data: unknown }>();
 
 class TaigaService implements IssueProviderService {
   static readonly baseUrl = "https://api.taiga.io/api/v1";
+
+  readonly #appUrl = "https://tree.taiga.io";
 
   static #refresh: null | Promise<boolean> = null;
 
@@ -139,6 +153,12 @@ class TaigaService implements IssueProviderService {
     } finally {
       TaigaService.#refresh = null;
     }
+  }
+
+  #getIssueURL(issue: IssueResponse): string {
+    const slug = issue.project_extra_info.slug;
+
+    return `${this.#appUrl}/project/${slug}/issue/${issue.ref}`;
   }
 
   async signIn(email: string, password: string): Promise<boolean> {
@@ -289,7 +309,7 @@ class TaigaService implements IssueProviderService {
     }
   }
 
-  async createIssue(issueData: IssueData): Promise<void> {
+  async createIssue(issueData: IssueData): Promise<IssueReturn> {
     try {
       const response = await this.initIssue(issueData);
 
@@ -299,6 +319,10 @@ class TaigaService implements IssueProviderService {
       );
 
       await this.insertIssueDescription(response.id, issueData, attachment);
+
+      return {
+        url: this.#getIssueURL(response),
+      };
     } catch (error) {
       const parsedError = handleRequestError(
         error,

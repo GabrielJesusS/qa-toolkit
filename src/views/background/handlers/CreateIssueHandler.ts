@@ -23,7 +23,7 @@ export async function CreateIssueHandler(message: unknown) {
       ? ExtensionWorker.getTrackedRequests()
       : undefined;
 
-    await taigaService.createIssue({
+    const taigaIssue = await taigaService.createIssue({
       subject: parsedMessage.data.title,
       description: parsedMessage.data.description,
       project: parsedMessage.data.projectId,
@@ -31,5 +31,9 @@ export async function CreateIssueHandler(message: unknown) {
       trackInfo: trackInfo,
       locale: locale,
     });
+
+    return {
+      url: taigaIssue.url,
+    };
   }
 }

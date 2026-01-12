@@ -1,13 +1,17 @@
-import type { InjectionKey, Ref } from "vue";
+import type { Component, InjectionKey, Ref } from "vue";
 
 type Notification = {
-  type: "success" | "error" | "info";
-  message: string;
+  type: "success" | "error" | "info" | "warning";
+  message: string | Component;
   id: number;
 };
 
 type SnackbarActions = {
-  notify: (message: string, type: "success" | "error" | "info") => void;
+  notify: (
+    message: Notification["message"],
+    type: Notification["type"],
+    duration?: number
+  ) => void;
 };
 
 export interface SnackbarContext {
