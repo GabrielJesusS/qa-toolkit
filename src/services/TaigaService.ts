@@ -59,6 +59,8 @@ const CACHE = new Map<string, { timestamp: number; data: unknown }>();
 class TaigaService implements IssueProviderService {
   static readonly baseUrl = "https://api.taiga.io/api/v1";
 
+  readonly #appUrl = "https://tree.taiga.io";
+
   static #refresh: null | Promise<boolean> = null;
 
   static #retries = 0;
@@ -154,7 +156,9 @@ class TaigaService implements IssueProviderService {
   }
 
   #getIssueURL(issue: IssueResponse): string {
-    return `${TaigaService.baseUrl}/project/${issue.project_extra_info.slug}/issue/${issue.ref}`;
+    const slug = issue.project_extra_info.slug;
+
+    return `${this.#appUrl}/project/${slug}/issue/${issue.ref}`;
   }
 
   async signIn(email: string, password: string): Promise<boolean> {
