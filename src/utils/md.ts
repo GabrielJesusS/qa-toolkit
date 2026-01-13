@@ -11,6 +11,8 @@ export async function generateMarkdownFromIssue(
 
   content += `![${issue.subject} screenshot](${issue.print}) \n`;
 
+  content += `Location: ${formatUrl(issue.href)}\n`;
+
   if (issue.trackInfo && issue.trackInfo.length > 0) {
     content += "## Tracked Network Requests: \n";
 

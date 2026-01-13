@@ -30,6 +30,7 @@ export async function CreateIssueHandler(message: unknown) {
       print: parsedMessage.data.print,
       trackInfo: trackInfo,
       locale: locale,
+      href: parsedMessage.data.href,
     });
 
     return {

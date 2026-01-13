@@ -5,23 +5,20 @@ import { sleep } from "@/utils/sleep";
 import { parseAsync } from "valibot";
 import { ref } from "vue";
 import { useSnackbar } from "./useSnackbar";
+import { ScreenshotDataSchema } from "@/schemas/screenshot-data";
 
-type ScreenshotState = {
-  image: string | null;
-  isLoading: boolean;
-};
+type ScreenshotState = ScreenshotDataSchema | null;
 
 export function useScreenshot() {
   const { notify } = useSnackbar();
 
-  const screenshotState = ref<ScreenshotState>({
-    image: null,
-    isLoading: false,
-  });
+  const screenshotState = ref<ScreenshotState>(null);
+
+  const isLoading = ref<boolean>(false);
 
   async function takeScreenshot() {
     try {
-      screenshotState.value.isLoading = true;
+      isLoading.value = true;
 
       await sleep(500);
 
@@ -34,20 +31,24 @@ export function useScreenshot() {
 
       const parsed = await parseAsync(ScreenshotSchema, result);
 
-      screenshotState.value.image = parsed.screenshot;
+      screenshotState.value = {
+        location: window.location.href,
+        screenshot: parsed.screenshot,
+      };
     } catch (error) {
       notify("Failed to take screenshot.", "error");
     } finally {
-      screenshotState.value.isLoading = false;
+      isLoading.value = false;
     }
   }
 
   async function clearScreenshot() {
-    screenshotState.value.image = null;
+    screenshotState.value = null;
   }
 
   return {
     screenshotState,
+    isLoading,
     takeScreenshot,
     clearScreenshot,
   };

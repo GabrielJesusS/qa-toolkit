@@ -14,12 +14,13 @@ import { useSnackbar } from '@/composables/useSnackbar';
 import Textarea from '../Textarea.vue';
 import { useTaigaSettings } from '@/composables/useTaigaSettings';
 import { useConfig } from '@/composables/useConfig';
+import { ScreenshotDataSchema } from '../../schemas/screenshot-data';
 import { safeParseAsync } from 'valibot';
 import { IssueResultSchema } from '@/schemas/issue-result';
 import IssueFeedback from '../IssueFeedback.vue';
 
 interface Props {
-    screenshot: string;
+    screenshotData: ScreenshotDataSchema;
     onSuccess?: () => void;
 }
 
@@ -59,7 +60,8 @@ const onSubmit = handleSubmit(async values => {
                 title: values.title,
                 description: values.description,
                 projectId: values.project,
-                print: props.screenshot,
+                print: props.screenshotData.screenshot,
+                href: props.screenshotData.location,
             },
         });
 
