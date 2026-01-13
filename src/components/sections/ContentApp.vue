@@ -11,7 +11,7 @@ const screenshot = useScreenshot()
 const { config } = useConfig()
 
 const toggle = () => {
-    if (screenshot.screenshotState.value.image === null) {
+    if (screenshot.screenshotState.value === null) {
         screenshot.takeScreenshot();
         return
     }
@@ -24,7 +24,7 @@ const onSuccess = () => {
 }
 
 const hasScreenshot = computed(() => {
-    return !!screenshot.screenshotState.value.image;
+    return screenshot.screenshotState.value !== null
 });
 
 </script>
@@ -32,14 +32,14 @@ const hasScreenshot = computed(() => {
 <template>
     <div data-qtk-anchor v-show="config.setup" :class="clsx('qtk:fixed qtk:z-99999 qtk:gap-4 qtk:right-0 qtk:bottom-0 qtk:font-bold qtk:flex qtk:flex-col qtk:items-end qtk:m-5',
         {
-            'qtk:opacity-0 qtk:pointer-events-none': !!screenshot.screenshotState.value.isLoading
+            'qtk:opacity-0 qtk:pointer-events-none': !!screenshot.isLoading.value
         })">
         <Transition mode="out-in" name="slide-fade">
             <div v-show="hasScreenshot" class="qtk:transition-opacity qtk:duration-300 qtk:max-w-xs qtk:overflow-hidden"
                 :class="hasScreenshot ? 'qtk:opacity-100' : 'qtk:opacity-0'">
                 <Paper class="qtk:w-xs">
-                    <IssueCreator @success="onSuccess" v-if="hasScreenshot"
-                        :screenshot="screenshot.screenshotState.value.image ?? ''" />
+                    <IssueCreator @success="onSuccess" v-if="screenshot.screenshotState.value !== null"
+                        :screenshotData="screenshot.screenshotState.value" />
                 </Paper>
             </div>
         </Transition>

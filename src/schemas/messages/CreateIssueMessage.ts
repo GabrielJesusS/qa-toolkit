@@ -8,6 +8,7 @@ export const CreateIssueMessage = v.object({
     description: v.string(),
     projectId: v.string(),
     print: v.string(),
+    href: v.string(),
   }),
 });
 
