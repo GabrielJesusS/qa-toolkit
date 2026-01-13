@@ -29,7 +29,11 @@ const classes = computed(() => clsx('qtk:z-99999999 qtk:fixed qtk:transform qtk:
             <TransitionGroup name="slide-fade">
                 <li v-for="notification in notifications" :key="notification.id">
                     <Toast :type="notification.type">
-                        {{ notification.message }}
+                        <component v-if="typeof notification.message !== 'string'" :is="notification.message">
+                        </component>
+                        <span v-else>
+                            {{ notification.message }}
+                        </span>
                     </Toast>
                 </li>
 

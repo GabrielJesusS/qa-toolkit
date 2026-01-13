@@ -5,7 +5,7 @@ import Label from "../Label.vue";
 import Helper from "../Helper.vue";
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from "@vee-validate/valibot"
-import { computed, watch } from "vue";
+import { computed, h, watch } from "vue";
 import { NewIssueSchema } from '@/schemas/new-issue';
 import ProjectSelector from '../ProjectSelector.vue';
 import { browserClient } from '@/core/BrowserClient';
@@ -15,6 +15,9 @@ import Textarea from '../Textarea.vue';
 import { useTaigaSettings } from '@/composables/useTaigaSettings';
 import { useConfig } from '@/composables/useConfig';
 import { ScreenshotDataSchema } from '../../schemas/screenshot-data';
+import { safeParseAsync } from 'valibot';
+import { IssueResultSchema } from '@/schemas/issue-result';
+import IssueFeedback from '../IssueFeedback.vue';
 
 interface Props {
     screenshotData: ScreenshotDataSchema;
@@ -51,7 +54,7 @@ watch(settings, () => {
 
 const onSubmit = handleSubmit(async values => {
     try {
-        await browserClient.sendMessage({
+        const result = await browserClient.sendMessage({
             type: HandlerMapEnum.CREATE_ISSUE,
             data: {
                 title: values.title,
@@ -62,8 +65,14 @@ const onSubmit = handleSubmit(async values => {
             },
         });
 
+        const parsedResult = await safeParseAsync(IssueResultSchema, result)
 
-        notify('Issue created successfully!', 'success');
+        if (!parsedResult.success) {
+            notify('Issue created successfully', 'success', 3000);
+            return
+        }
+
+        notify(h(IssueFeedback, { url: parsedResult.output.url }), 'success', 6000);
         props.onSuccess?.();
     } catch (error) {
         notify('Failed to create issue, please try again.', 'error');

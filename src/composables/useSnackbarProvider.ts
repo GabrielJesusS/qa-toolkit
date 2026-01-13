@@ -1,5 +1,5 @@
 import { SnackbarCTXKey } from "@/contexts/SnackbarContext";
-import { provide, ref, InjectionKey, UnwrapRef } from "vue";
+import { provide, ref, InjectionKey, UnwrapRef, Component } from "vue";
 
 type GetInnerType<S> = S extends InjectionKey<infer T> ? T : never;
 
@@ -11,8 +11,8 @@ export const useSnackbarProvider = () => {
   const notificationList = ref<Notifications>([]);
 
   const notify = (
-    message: string,
-    type: "success" | "error" | "info" = "info",
+    message: string | Component,
+    type: "success" | "error" | "info" | "warning" = "info",
     duration: number = 3000
   ) => {
     const id = Date.now();
