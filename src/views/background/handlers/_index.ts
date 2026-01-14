@@ -8,6 +8,7 @@ import { CreateIssueHandler } from "./CreateIssueHandler";
 import { SaveTaigaSettingsHandler } from "./SaveTaigaSettingsHandler";
 import { GetTaigaSettingsHandler } from "./GetTaigaSettingsHandler";
 import { SetAppConfigHandler } from "./SetAppConfigHandler";
+import { ResetAppHandler } from "./ResetAppHandler";
 
 messageController.registerHandler(HandlerMapEnum.TAIGA_SIGN_IN, TaigaSignInHandler);
 messageController.registerHandler(HandlerMapEnum.GET_APP_CONFIG, GetAppConfigHandler);
@@ -17,3 +18,4 @@ messageController.registerHandler(HandlerMapEnum.CREATE_ISSUE, CreateIssueHandle
 messageController.registerHandler(HandlerMapEnum.SAVE_TAIGA_SETTINGS, SaveTaigaSettingsHandler)
 messageController.registerHandler(HandlerMapEnum.GET_TAIGA_SETTINGS, GetTaigaSettingsHandler)
 messageController.registerHandler(HandlerMapEnum.SET_APP_CONFIG, SetAppConfigHandler);
+messageController.registerHandler(HandlerMapEnum.RESET_APP, ResetAppHandler);

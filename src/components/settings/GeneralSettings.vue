@@ -3,8 +3,16 @@ import Button from "../Button.vue";
 import { useConfig } from "@/composables/useConfig";
 import Slider from "../Slider.vue";
 import Label from "../Label.vue";
+import { browserClient } from "@/core/BrowserClient";
+import { HandlerMapEnum } from "@/core/enums/HandlerMapEnum";
 
-const { resetSetup, config, setConfig } = useConfig()
+const { config, setConfig } = useConfig()
+
+async function resetSetup() {
+    await browserClient.sendMessage({
+        type: HandlerMapEnum.RESET_APP
+    })
+}
 
 </script>
 

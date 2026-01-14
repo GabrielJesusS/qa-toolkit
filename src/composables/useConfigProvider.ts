@@ -40,10 +40,6 @@ export function useConfigProvider() {
     appConfig.value = value;
   }
 
-  function resetSetup() {
-    setConfig({ setup: false, provider: "", sendNetwork: false, urlTrack: "" });
-  }
-
   watch(appConfig, async (newConfig) => {
     if (hasLoadedData.value) {
       await browserClient.sendMessage({
@@ -72,7 +68,6 @@ export function useConfigProvider() {
 
   provide(ConfigCTXKey, {
     config: appConfig,
-    resetSetup,
     setConfig,
   });
 

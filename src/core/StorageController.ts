@@ -37,6 +37,10 @@ class StorageController {
 
     return parsedResult;
   }
+
+  static async clear() {
+    await chrome.storage.local.clear();
+  }
 }
 
 export { StorageController };
