@@ -3,7 +3,6 @@ import type { InjectionKey, Ref } from "vue";
 
 export interface ConfigContext {
   config: Ref<AppConfigSchema>;
-  resetSetup: () => void;
   setConfig: (
     newConfig:
       | AppConfigSchema

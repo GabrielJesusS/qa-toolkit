@@ -27,6 +27,7 @@ type TaigaProjectResponse = {
 };
 
 type TaigaClientOptions = {
+  noRetry?: boolean;
   auth?: boolean;
 } & Parameters<typeof client>[1];
 
@@ -50,11 +51,7 @@ type IssueReturn = {
   url: string;
 };
 
-const MAX_RETRIES = 2;
-
-const CACHE_INTERVAL = 2 * 60 * 60 * 1000; // 2 hours
-
-const CACHE = new Map<string, { timestamp: number; data: unknown }>();
+const MAX_RETRIES = 1;
 
 class TaigaService implements IssueProviderService {
   static readonly baseUrl = "https://api.taiga.io/api/v1";
@@ -100,18 +97,7 @@ class TaigaService implements IssueProviderService {
     options?: TaigaClientOptions
   ): Promise<ReturnType<typeof client<T>>> {
     try {
-      const isGetRequest =
-        !options?.method || options.method === HttpMethodsEnum.GET;
-
-      if (isGetRequest) {
-        const cached = CACHE.get(path);
-
-        if (cached && Date.now() - cached.timestamp < CACHE_INTERVAL) {
-          return cached.data as ReturnType<typeof client<T>>;
-        }
-      }
-
-      const { auth = true, ...rest } = options || {};
+      const { auth = true, noRetry = false, ...rest } = options || {};
 
       const header = auth ? await this.getAuthHeader() : {};
 
@@ -120,10 +106,6 @@ class TaigaService implements IssueProviderService {
         headers: { ...header, ...rest?.headers },
       });
 
-      if (isGetRequest) {
-        CACHE.set(path, { timestamp: Date.now(), data: result });
-      }
-
       return result;
     } catch (error) {
       const parsedError = handleRequestError(error, "Taiga request failed");
@@ -131,6 +113,10 @@ class TaigaService implements IssueProviderService {
       const tokens = await this.getAuth();
 
       if (parsedError.statusCode === HttpStatusCode.UNAUTHORIZED && tokens) {
+        if (options?.noRetry) {
+          throw new TaigaServiceError("Unauthorized", "SIGN_IN", error);
+        }
+
         if (TaigaService.#retries >= MAX_RETRIES) {
           // await this.removeTokens();
           TaigaService.#retries = 0;
@@ -164,6 +150,8 @@ class TaigaService implements IssueProviderService {
   async signIn(email: string, password: string): Promise<boolean> {
     try {
       const response = await this.taigaClient<SignInResponse>("/auth", {
+        auth: false,
+        noRetry: true,
         method: HttpMethodsEnum.POST,
         body: JSON.stringify({
           type: "normal",

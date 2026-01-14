@@ -34,6 +34,12 @@ const ERROR_STATUS_CODES = [
   HttpStatusCode.INTERNAL_SERVER_ERROR,
 ];
 
+const CACHE_INTERVAL = 2 * 60 * 60 * 1000; // 2 hours
+
+const CACHE = new Map<string, { timestamp: number; data: unknown }>();
+
+const PENDING_REQUESTS = new Map<string, Promise<unknown>>();
+
 function mountHeader(customHeader?: CustomHeaders) {
   const mountedHeaders = new Headers({ ...DEFAULT_HEADERS, ...customHeader });
 
@@ -61,18 +67,55 @@ async function parseResponse<T>(response: Response) {
   return parsedBody;
 }
 
+function getRequestKey(url: string, options?: RequestInit) {
+  return `${url}:${JSON.stringify(options)}`;
+}
+
+async function dedupedFetch<T>(url: string, options?: HTTPClientCustomOptions) {
+  const key = getRequestKey(url, options);
+
+  const headers = mountHeader(options?.headers);
+
+  const isGetRequest =
+    !options?.method || options.method === HttpMethodsEnum.GET;
+
+  if (PENDING_REQUESTS.has(key)) {
+    return PENDING_REQUESTS.get(key) as Promise<HTTPClientExecutionReturn<T>>;
+  }
+
+  if (isGetRequest) {
+    const cached = CACHE.get(key);
+
+    if (cached && Date.now() - cached.timestamp < CACHE_INTERVAL) {
+      return cached.data as HTTPClientExecutionReturn<T>;
+    }
+  }
+
+  const fetchPromise = fetch(url, { ...options, headers })
+    .then(async (response) => {
+      const result = {
+        data: await parseResponse<T>(response),
+        status: response.status,
+      };
+
+      if (isGetRequest) {
+        CACHE.set(key, { timestamp: Date.now(), data: result });
+      }
+
+      return result;
+    })
+    .finally(() => {
+      PENDING_REQUESTS.delete(key);
+    });
+
+  PENDING_REQUESTS.set(key, fetchPromise);
+
+  return fetchPromise as Promise<HTTPClientExecutionReturn<T>>;
+}
+
 export async function client<T>(
   url: string,
   options?: HTTPClientCustomOptions
 ): Promise<HTTPClientExecutionReturn<T>> {
-  const headers = mountHeader(options?.headers);
-
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
-
-  const parsedResponse = await parseResponse<T>(response);
-
-  return { data: parsedResponse, status: response.status };
+  return dedupedFetch<T>(url, options);
 }

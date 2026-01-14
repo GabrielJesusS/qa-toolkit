@@ -30,7 +30,7 @@ const hasScreenshot = computed(() => {
 </script>
 
 <template>
-    <div data-qtk-anchor v-show="config.setup" :class="clsx('qtk:fixed qtk:z-99999 qtk:gap-4 qtk:right-0 qtk:bottom-0 qtk:font-bold qtk:flex qtk:flex-col qtk:items-end qtk:m-5',
+    <div data-qtk-anchor v-if="config.setup" :class="clsx('qtk:fixed qtk:z-99999 qtk:gap-4 qtk:right-0 qtk:bottom-0 qtk:font-bold qtk:flex qtk:flex-col qtk:items-end qtk:m-5',
         {
             'qtk:opacity-0 qtk:pointer-events-none': !!screenshot.isLoading.value
         })">
