@@ -34,6 +34,10 @@ const ERROR_STATUS_CODES = [
   HttpStatusCode.INTERNAL_SERVER_ERROR,
 ];
 
+const CACHE_INTERVAL = 2 * 60 * 60 * 1000; // 2 hours
+
+const CACHE = new Map<string, { timestamp: number; data: unknown }>();
+
 const PENDING_REQUESTS = new Map<string, Promise<unknown>>();
 
 function mountHeader(customHeader?: CustomHeaders) {
@@ -72,15 +76,34 @@ async function dedupedFetch<T>(url: string, options?: HTTPClientCustomOptions) {
 
   const headers = mountHeader(options?.headers);
 
+  const isGetRequest =
+    !options?.method || options.method === HttpMethodsEnum.GET;
+
   if (PENDING_REQUESTS.has(key)) {
     return PENDING_REQUESTS.get(key) as Promise<HTTPClientExecutionReturn<T>>;
   }
 
+  if (isGetRequest) {
+    const cached = CACHE.get(key);
+
+    if (cached && Date.now() - cached.timestamp < CACHE_INTERVAL) {
+      return cached.data as HTTPClientExecutionReturn<T>;
+    }
+  }
+
   const fetchPromise = fetch(url, { ...options, headers })
-    .then(async (response) => ({
-      data: await parseResponse<T>(response),
-      status: response.status,
-    }))
+    .then(async (response) => {
+      const result = {
+        data: await parseResponse<T>(response),
+        status: response.status,
+      };
+
+      if (isGetRequest) {
+        CACHE.set(key, { timestamp: Date.now(), data: result });
+      }
+
+      return result;
+    })
     .finally(() => {
       PENDING_REQUESTS.delete(key);
     });

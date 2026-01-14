@@ -53,10 +53,6 @@ type IssueReturn = {
 
 const MAX_RETRIES = 1;
 
-const CACHE_INTERVAL = 2 * 60 * 60 * 1000; // 2 hours
-
-const CACHE = new Map<string, { timestamp: number; data: unknown }>();
-
 class TaigaService implements IssueProviderService {
   static readonly baseUrl = "https://api.taiga.io/api/v1";
 
@@ -101,17 +97,6 @@ class TaigaService implements IssueProviderService {
     options?: TaigaClientOptions
   ): Promise<ReturnType<typeof client<T>>> {
     try {
-      const isGetRequest =
-        !options?.method || options.method === HttpMethodsEnum.GET;
-
-      if (isGetRequest) {
-        const cached = CACHE.get(path);
-
-        if (cached && Date.now() - cached.timestamp < CACHE_INTERVAL) {
-          return cached.data as ReturnType<typeof client<T>>;
-        }
-      }
-
       const { auth = true, noRetry = false, ...rest } = options || {};
 
       const header = auth ? await this.getAuthHeader() : {};
@@ -120,10 +105,6 @@ class TaigaService implements IssueProviderService {
         ...rest,
         headers: { ...header, ...rest?.headers },
       });
-
-      if (isGetRequest) {
-        CACHE.set(path, { timestamp: Date.now(), data: result });
-      }
 
       return result;
     } catch (error) {
