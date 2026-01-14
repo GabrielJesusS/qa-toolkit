@@ -27,6 +27,7 @@ type TaigaProjectResponse = {
 };
 
 type TaigaClientOptions = {
+  noRetry?: boolean;
   auth?: boolean;
 } & Parameters<typeof client>[1];
 
@@ -50,7 +51,7 @@ type IssueReturn = {
   url: string;
 };
 
-const MAX_RETRIES = 2;
+const MAX_RETRIES = 1;
 
 const CACHE_INTERVAL = 2 * 60 * 60 * 1000; // 2 hours
 
@@ -111,7 +112,7 @@ class TaigaService implements IssueProviderService {
         }
       }
 
-      const { auth = true, ...rest } = options || {};
+      const { auth = true, noRetry = false, ...rest } = options || {};
 
       const header = auth ? await this.getAuthHeader() : {};
 
@@ -131,6 +132,10 @@ class TaigaService implements IssueProviderService {
       const tokens = await this.getAuth();
 
       if (parsedError.statusCode === HttpStatusCode.UNAUTHORIZED && tokens) {
+        if (options?.noRetry) {
+          throw new TaigaServiceError("Unauthorized", "SIGN_IN", error);
+        }
+
         if (TaigaService.#retries >= MAX_RETRIES) {
           // await this.removeTokens();
           TaigaService.#retries = 0;
@@ -164,6 +169,8 @@ class TaigaService implements IssueProviderService {
   async signIn(email: string, password: string): Promise<boolean> {
     try {
       const response = await this.taigaClient<SignInResponse>("/auth", {
+        auth: false,
+        noRetry: true,
         method: HttpMethodsEnum.POST,
         body: JSON.stringify({
           type: "normal",
