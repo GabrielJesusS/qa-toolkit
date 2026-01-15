@@ -2,16 +2,24 @@ import { IssueData } from "@/core/types/IssueData";
 import { formatUrl } from "./url";
 import { formatLocaleDate } from "./date";
 
+const MARKDOWN_SPECIAL_CHARACTERS = /([\\`*_{}[\]()#+\-.!~|^$])/g;
+
+function escapeCharacters(text: string): string {
+  return text.replace(MARKDOWN_SPECIAL_CHARACTERS, "\\$1");
+}
+
 export async function generateMarkdownFromIssue(
   issue: IssueData
 ): Promise<string> {
   let content = "";
 
-  content += `${issue.description} \n\n`;
+  content += `${escapeCharacters(issue.description)} \n\n`;
 
-  content += `![${issue.subject} screenshot](${issue.print}) \n`;
+  const printAltText = escapeCharacters(issue.subject || "screenshot");
 
-  content += `Location: ${formatUrl(issue.href)}\n`;
+  content += `![${printAltText}](${issue.print}) \n`;
+
+  content += `Location: ${formatUrl(issue.href)} \n`;
 
   if (issue.trackInfo && issue.trackInfo.length > 0) {
     content += "## Tracked Network Requests: \n";
