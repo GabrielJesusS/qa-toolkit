@@ -4,7 +4,9 @@ import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
 import zip from 'vite-plugin-zip-pack'
 import manifest from './manifest.config.ts'
+import tailwindcss from '@tailwindcss/vite'
 import { name, version } from './package.json'
+import svgLoader from 'vite-svg-loader'
 
 export default defineConfig({
   resolve: {
@@ -14,6 +16,8 @@ export default defineConfig({
   },
   plugins: [
     vue(),
+    svgLoader(),
+    tailwindcss(),
     crx({ manifest }),
     zip({ outDir: 'release', outFileName: `crx-${name}-${version}.zip` }),
   ],

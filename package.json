@@ -1,24 +1,37 @@
 {
   "name": "qa-toolkit",
   "type": "module",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
+  "description": "A browser extension to enhance your QA workflow.",
+  "author": {
+    "name": "Gabriel Jesus",
+    "email": "gabriel.ds.jesus@gmail.com",
+    "url": "https://github.com/GabrielJesusS"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build"
   },
   "dependencies": {
+    "@vee-validate/valibot": "^4.15.1",
+    "clsx": "^2.1.1",
+    "valibot": "^1.2.0",
+    "vee-validate": "^4.15.1",
     "vue": "^3.5.17"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.3",
+    "@tailwindcss/vite": "^4.1.18",
     "@types/chrome": "^0.1.1",
     "@types/node": "^24.0.15",
     "@vitejs/plugin-vue": "^6.0.0",
     "@vue/tsconfig": "^0.7.0",
+    "tailwindcss": "^4.1.18",
     "typescript": "~5.8.3",
     "vite": "^7.0.5",
     "vite-plugin-zip-pack": "^1.2.4",
+    "vite-svg-loader": "^5.1.0",
     "vue-tsc": "^3.0.3"
   }
 }

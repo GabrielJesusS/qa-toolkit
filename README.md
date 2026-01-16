@@ -1,52 +1,29 @@
-# Vue 3 + Vite + CRXJS
+# QA toolkit
 
-This template helps you quickly start developing Chrome extensions with Vue 3, TypeScript and Vite. It includes the CRXJS Vite plugin for seamless Chrome extension development.
+A browser extension to enhance your QA workflow.
 
 ## Features
 
-- Vue 3 with `<script setup>` syntax
-- TypeScript support
-- Vite build tool
-- CRXJS Vite plugin integration
-- Chrome extension manifest configuration
+- Screenshot Capture: Quickly capture and annotate screenshots of web pages.
+- Bug Reporting: Easily report bugs with pre-filled templates and relevant metadata.
 
-## Quick Start
+## In progress features
 
-1. Install dependencies:
+### General
 
-```bash
-npm install
-```
+- [ ] Dark mode support;
+- [ ] Multi-language support;
+- [ ] Customizable keyboard shortcuts;
+- [ ] Screenshot annotation tools (e.g., arrows, shapes, text);
+- [ ] Screenshot manipulation (e.g., crop, resize, blur);
+- [ ] Attach multiple screenshots to a single bug report;
 
-2. Start development server:
+### Taiga Service
 
-```bash
-npm run dev
-```
-
-3. Open Chrome and navigate to `chrome://extensions/`, enable "Developer mode", and load the unpacked extension from the `dist` directory.
-
-4. Build for production:
-
-```bash
-npm run build
-```
-
-## Project Structure
-
-- `src/popup/` - Extension popup UI
-- `src/content/` - Content scripts
-- `manifest.config.ts` - Chrome extension manifest configuration
-
-## Documentation
-
-- [Vue 3 Documentation](https://vuejs.org/)
-- [Vite Documentation](https://vitejs.dev/)
-- [CRXJS Documentation](https://crxjs.dev/vite-plugin)
-
-## Chrome Extension Development Notes
-
-- Use `manifest.config.ts` to configure your extension
-- The CRXJS plugin automatically handles manifest generation
-- Content scripts should be placed in `src/content/`
-- Popup UI should be placed in `src/popup/`
+- [ ] Add tags to the issue;
+- [ ] Edit the content style;
+- [ ] Assign the issue to a responsible person;
+- [ ] Mention users in the body of the issue;
+- [ ] Set the urgency level of the issue;
+- [ ] Set a status for the issue;
+- [ ] List recent issues from the project;
