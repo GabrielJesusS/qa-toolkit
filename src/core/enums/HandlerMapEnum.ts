@@ -8,6 +8,7 @@ export const HandlerMapEnum = {
   SAVE_TAIGA_SETTINGS: "save-taiga-settings",
   GET_TAIGA_SETTINGS: "get-taiga-settings",
   RESET_APP: "reset-app",
+  GET_TAIGA_TAGS: "get-taiga-tags",
 } as const;
 
 export type HandlerMapEnum =

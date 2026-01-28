@@ -18,6 +18,8 @@ import { ScreenshotDataSchema } from '../../schemas/screenshot-data';
 import { safeParseAsync } from 'valibot';
 import { IssueResultSchema } from '@/schemas/issue-result';
 import IssueFeedback from '../IssueFeedback.vue';
+import { useTaigaTags } from '@/composables/useTaigaTags';
+import Select from '../Select.vue';
 
 interface Props {
     screenshotData: ScreenshotDataSchema;
@@ -46,6 +48,8 @@ const { notify } = useSnackbar()
 const { value: title } = useField<string>('title');
 const { value: description } = useField<string>('description');
 const { value: project, setValue } = useField<string>('project');
+
+const { tagsOptions } = useTaigaTags(project)
 
 watch(settings, () => {
     setValue(settings.value.defaultProjectId)
@@ -101,12 +105,13 @@ const hasDescriptionError = computed(() => !!errors?.value.description);
                 type="text" placeholder="Issue description" />
             <Helper :error="hasDescriptionError" v-if="hasDescriptionError">{{ errors.description }}</Helper>
         </div>
-
-        <p>
-            {{ errors.project }}
-        </p>
         <ProjectSelector v-model="project" v-show="!settings.defaultProjectId" />
-
+        <div>
+            <Label for="issue-tags" required>Tags</Label>
+            <Select :options="tagsOptions.map(tag => ({ label: tag.name, value: tag.value }))"
+                id="issue-tags" placeholder="Select a Tag"></Select>
+            <!-- <Helper :error="hasTitleError" v-if="hasTitleError">{{ errors.title }}</Helper> -->
+        </div>
         <Button :loading="isSubmitting" type="submit">
             Create issue
         </Button>
