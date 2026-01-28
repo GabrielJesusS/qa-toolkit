@@ -28,6 +28,7 @@ export function useConfigProvider() {
   const appConfig = ref<AppConfigSchema>({
     setup: false,
     sendNetwork: false,
+    validSession: false,
     provider: "",
   });
 

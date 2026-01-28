@@ -1,6 +1,7 @@
 export type TaigaServiceErrorType =
   | "SIGN_IN"
   | "REVALIDATE_TOKEN"
+  | "UNAVAILABLE"
   | "INIT_ISSUE"
   | "CREATE_ATTACHMENT"
   | "INSERT_DESCRIPTION"

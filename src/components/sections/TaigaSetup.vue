@@ -42,7 +42,9 @@ const onSubmit = handleSubmit(async values => {
         })
 
         setConfig((old) => ({
-            ...old, provider: 'taiga'
+            ...old,
+            provider: 'taiga',
+            validSession: true,
         }))
 
         wizardActions?.nextStep();
