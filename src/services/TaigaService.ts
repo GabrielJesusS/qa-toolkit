@@ -27,7 +27,7 @@ type TaigaProjectResponse = {
 };
 
 type TaigaClientOptions = {
-  noRetry?: boolean;
+  retry?: boolean;
   auth?: boolean;
 } & Parameters<typeof client>[1];
 
@@ -58,7 +58,7 @@ class TaigaService implements IssueProviderService {
 
   readonly #appUrl = "https://tree.taiga.io";
 
-  static #refresh: null | Promise<boolean> = null;
+  static #refresh: null | Promise<void> = null;
 
   static #retries = 0;
 
@@ -66,7 +66,7 @@ class TaigaService implements IssueProviderService {
     try {
       return await StorageController.get(
         StorageKeyEnum.TAIGA_AUTH,
-        TaigaAuthSchema
+        TaigaAuthSchema,
       );
     } catch (error) {
       return null;
@@ -75,10 +75,6 @@ class TaigaService implements IssueProviderService {
 
   async setTokens(tokens: TaigaAuthSchema) {
     await StorageController.set(StorageKeyEnum.TAIGA_AUTH, tokens);
-  }
-
-  async removeTokens() {
-    await StorageController.remove(StorageKeyEnum.TAIGA_AUTH);
   }
 
   async getAuthHeader() {
@@ -94,10 +90,10 @@ class TaigaService implements IssueProviderService {
   // Generic Taiga API client with automatic token revalidation
   async taigaClient<T>(
     path: `/${string}`,
-    options?: TaigaClientOptions
+    options?: TaigaClientOptions,
   ): Promise<ReturnType<typeof client<T>>> {
     try {
-      const { auth = true, noRetry = false, ...rest } = options || {};
+      const { auth = true, retry = false, ...rest } = options || {};
 
       const header = auth ? await this.getAuthHeader() : {};
 
@@ -113,12 +109,11 @@ class TaigaService implements IssueProviderService {
       const tokens = await this.getAuth();
 
       if (parsedError.statusCode === HttpStatusCode.UNAUTHORIZED && tokens) {
-        if (options?.noRetry) {
+        if (options?.retry) {
           throw new TaigaServiceError("Unauthorized", "SIGN_IN", error);
         }
 
         if (TaigaService.#retries >= MAX_RETRIES) {
-          // await this.removeTokens();
           TaigaService.#retries = 0;
           throw new Error("Max retries reached for Taiga authentication");
         }
@@ -151,7 +146,7 @@ class TaigaService implements IssueProviderService {
     try {
       const response = await this.taigaClient<SignInResponse>("/auth", {
         auth: false,
-        noRetry: true,
+        retry: true,
         method: HttpMethodsEnum.POST,
         body: JSON.stringify({
           type: "normal",
@@ -175,36 +170,32 @@ class TaigaService implements IssueProviderService {
 
   async signOut(): Promise<void> {}
 
-  async revalidateToken(): Promise<boolean> {
-    try {
-      const tokens = await this.getAuth();
+  async revalidateToken() {
+    const tokens = await this.getAuth();
 
-      if (!tokens) {
-        throw new Error("No tokens found for revalidation");
-      }
-
-      const response = await this.taigaClient<TaigaTokenResponse>(
-        "/auth/refresh",
-        {
-          method: HttpMethodsEnum.POST,
-          auth: false,
-          body: JSON.stringify({
-            refresh: tokens.refresh,
-          }),
-        }
-      );
-
-      this.setTokens({
-        refresh: response.data.refresh,
-        token: response.data.auth_token,
-        id: tokens.id,
-      });
-
-      TaigaService.#retries = 0;
-      return true;
-    } catch (error) {
-      return false;
+    if (!tokens) {
+      throw new Error("No tokens found for revalidation");
     }
+
+    const response = await this.taigaClient<TaigaTokenResponse>(
+      "/auth/refresh",
+      {
+        method: HttpMethodsEnum.POST,
+        auth: false,
+        retry: true,
+        body: JSON.stringify({
+          refresh: tokens.refresh,
+        }),
+      },
+    );
+
+    this.setTokens({
+      refresh: response.data.refresh,
+      token: response.data.auth_token,
+      id: tokens.id,
+    });
+
+    TaigaService.#retries = 0;
   }
 
   async initIssue(issueData: IssueData): Promise<IssueResponse> {
@@ -221,7 +212,7 @@ class TaigaService implements IssueProviderService {
     } catch (error) {
       const parsedError = handleRequestError(
         error,
-        "Taiga issue initialization failed"
+        "Taiga issue initialization failed",
       );
       throw new TaigaServiceError(parsedError.message, "INIT_ISSUE", error);
     }
@@ -229,7 +220,7 @@ class TaigaService implements IssueProviderService {
 
   async createScreenshotAttachment(
     issueId: IssueResponse["id"],
-    issueData: IssueData
+    issueData: IssueData,
   ): Promise<AttachmentResponse> {
     try {
       const attachmentContent = new FormData();
@@ -238,7 +229,7 @@ class TaigaService implements IssueProviderService {
       attachmentContent.append("project", issueData.project);
       attachmentContent.append(
         "attached_file",
-        base64ToFile(issueData.print, "screenshot.png")
+        base64ToFile(issueData.print, "screenshot.png"),
       );
 
       const attachment = await this.taigaClient<AttachmentResponse>(
@@ -249,19 +240,19 @@ class TaigaService implements IssueProviderService {
             "Content-Type": "multipart/form-data",
           },
           body: attachmentContent,
-        }
+        },
       );
 
       return attachment.data;
     } catch (error) {
       const parsedError = handleRequestError(
         error,
-        "Taiga issue attachment failed"
+        "Taiga issue attachment failed",
       );
       throw new TaigaServiceError(
         parsedError.message,
         "CREATE_ATTACHMENT",
-        error
+        error,
       );
     }
   }
@@ -269,7 +260,7 @@ class TaigaService implements IssueProviderService {
   async insertIssueDescription(
     issueId: IssueResponse["id"],
     issueData: IssueData,
-    attachment: AttachmentResponse
+    attachment: AttachmentResponse,
   ) {
     try {
       const description = await generateMarkdownFromIssue({
@@ -287,12 +278,12 @@ class TaigaService implements IssueProviderService {
     } catch (error) {
       const parsedError = handleRequestError(
         error,
-        "Taiga issue description failed"
+        "Taiga issue description failed",
       );
       throw new TaigaServiceError(
         parsedError.message,
         "INSERT_DESCRIPTION",
-        error
+        error,
       );
     }
   }
@@ -303,7 +294,7 @@ class TaigaService implements IssueProviderService {
 
       const attachment = await this.createScreenshotAttachment(
         response.id,
-        issueData
+        issueData,
       );
 
       await this.insertIssueDescription(response.id, issueData, attachment);
@@ -314,7 +305,7 @@ class TaigaService implements IssueProviderService {
     } catch (error) {
       const parsedError = handleRequestError(
         error,
-        "Taiga issue creation failed"
+        "Taiga issue creation failed",
       );
       throw new TaigaServiceError(parsedError.message, "CREATE_ISSUE", error);
     }
@@ -344,7 +335,7 @@ class TaigaService implements IssueProviderService {
         `/projects?member=${tokens.id}`,
         {
           method: HttpMethodsEnum.GET,
-        }
+        },
       );
 
       return response.data.map((project) => ({
@@ -354,7 +345,7 @@ class TaigaService implements IssueProviderService {
     } catch (error) {
       const parsedError = handleRequestError(
         error,
-        "Taiga project listing failed"
+        "Taiga project listing failed",
       );
       throw new TaigaServiceError(parsedError.message, "LIST_PROJECTS", error);
     }
