@@ -98,9 +98,10 @@ class TaigaService implements IssueProviderService {
     options?: TaigaClientOptions,
   ): Promise<ReturnType<typeof client<T>>> {
     const { auth = true, retry = true, ...rest } = options || {};
-    try {
-      const header = auth ? await this.getAuthHeader() : {};
 
+    const header = auth ? await this.getAuthHeader() : {};
+
+    try {
       const result = await client<T>(`${TaigaService.baseUrl}${path}`, {
         ...rest,
         headers: { ...header, ...rest?.headers },

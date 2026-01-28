@@ -24,14 +24,12 @@ export async function GetAppConfigHandler(message: unknown) {
 
       const result = await taigaService.checkLogin();
 
-      if (result === "active") {
-        return {
-          ...DEFAULT_SETTINGS,
-          ...appConfig,
-          validSession: result === "active",
-          setup: false,
-        };
-      }
+      return {
+        ...DEFAULT_SETTINGS,
+        ...appConfig,
+        validSession: result === "active",
+        setup: result !== "invalid" && result !== "inactive",
+      };
     }
 
     return { ...DEFAULT_SETTINGS, ...appConfig };
