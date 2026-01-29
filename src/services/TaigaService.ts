@@ -11,6 +11,7 @@ import { base64ToFile } from "@/utils/file";
 import { generateMarkdownFromIssue } from "@/utils/md";
 import { TaigaServiceError } from "./TaigaServiceError";
 import { handleRequestError } from "@/utils/error";
+import { AuthStatus } from "@/core/types/AuthStatus";
 
 type TaigaTokenResponse = {
   refresh: string;
@@ -80,11 +81,13 @@ class TaigaService implements IssueProviderService {
   async getAuthHeader() {
     const tokens = await this.getAuth();
 
-    if (tokens) {
-      return { Authorization: `Bearer ${tokens.token}` };
+    if (!tokens) return {};
+
+    if (tokens.expired) {
+      throw new TaigaServiceError("Token expired", "REVALIDATE_TOKEN");
     }
 
-    return {};
+    return { Authorization: `Bearer ${tokens.token}` };
   }
 
   // Generic Taiga API client with automatic token revalidation
@@ -92,11 +95,11 @@ class TaigaService implements IssueProviderService {
     path: `/${string}`,
     options?: TaigaClientOptions,
   ): Promise<ReturnType<typeof client<T>>> {
+    const { auth = true, retry = true, ...rest } = options || {};
+
+    const header = auth ? await this.getAuthHeader() : {};
+
     try {
-      const { auth = true, retry = false, ...rest } = options || {};
-
-      const header = auth ? await this.getAuthHeader() : {};
-
       const result = await client<T>(`${TaigaService.baseUrl}${path}`, {
         ...rest,
         headers: { ...header, ...rest?.headers },
@@ -109,7 +112,7 @@ class TaigaService implements IssueProviderService {
       const tokens = await this.getAuth();
 
       if (parsedError.statusCode === HttpStatusCode.UNAUTHORIZED && tokens) {
-        if (options?.retry) {
+        if (!retry) {
           throw new TaigaServiceError("Unauthorized", "SIGN_IN", error);
         }
 
@@ -146,7 +149,7 @@ class TaigaService implements IssueProviderService {
     try {
       const response = await this.taigaClient<SignInResponse>("/auth", {
         auth: false,
-        retry: true,
+        retry: false,
         method: HttpMethodsEnum.POST,
         body: JSON.stringify({
           type: "normal",
@@ -159,6 +162,7 @@ class TaigaService implements IssueProviderService {
         refresh: response.data.refresh,
         token: response.data.auth_token,
         id: response.data.id,
+        expired: false,
       });
 
       return true;
@@ -177,25 +181,34 @@ class TaigaService implements IssueProviderService {
       throw new Error("No tokens found for revalidation");
     }
 
-    const response = await this.taigaClient<TaigaTokenResponse>(
-      "/auth/refresh",
-      {
-        method: HttpMethodsEnum.POST,
-        auth: false,
-        retry: true,
-        body: JSON.stringify({
-          refresh: tokens.refresh,
-        }),
-      },
-    );
+    try {
+      const response = await this.taigaClient<TaigaTokenResponse>(
+        "/auth/refresh",
+        {
+          method: HttpMethodsEnum.POST,
+          auth: false,
+          retry: false,
+          body: JSON.stringify({
+            refresh: tokens.refresh,
+          }),
+        },
+      );
 
-    this.setTokens({
-      refresh: response.data.refresh,
-      token: response.data.auth_token,
-      id: tokens.id,
-    });
+      this.setTokens({
+        refresh: response.data.refresh,
+        token: response.data.auth_token,
+        id: tokens.id,
+        expired: false,
+      });
 
-    TaigaService.#retries = 0;
+      TaigaService.#retries = 0;
+    } catch (error) {
+      if (error instanceof TaigaServiceError && error.type === "SIGN_IN") {
+        this.setTokens({ ...tokens, expired: true });
+      }
+
+      throw error;
+    }
   }
 
   async initIssue(issueData: IssueData): Promise<IssueResponse> {
@@ -311,15 +324,22 @@ class TaigaService implements IssueProviderService {
     }
   }
 
-  async checkLogin(): Promise<boolean> {
+  async checkLogin(): Promise<AuthStatus> {
     try {
       await this.taigaClient("/users/me", {
         method: HttpMethodsEnum.GET,
       });
 
-      return true;
+      return "active";
     } catch (error) {
-      return false;
+      if (
+        error instanceof TaigaServiceError &&
+        error.type === "REVALIDATE_TOKEN"
+      ) {
+        return "expired";
+      }
+
+      return "inactive";
     }
   }
 

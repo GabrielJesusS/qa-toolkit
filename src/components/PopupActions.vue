@@ -57,10 +57,14 @@ async function toggleURLCapture() {
 <template>
     <div
         :class="clsx('qtk:flex qtk:gap-4 qtk:items-center', config.setup ? ' qtk:justify-between' : ' qtk:justify-end')">
-        <div v-if="config.setup" class="qtk:flex qtk:gap-4 qtk:items-center">
+        <div v-if="config.setup && config.validSession" class="qtk:flex qtk:gap-4 qtk:items-center">
             <IconButton :active="!!config.urlTrack" @click="toggleURLCapture">
                 <Capture class="qtk:size-6" />
             </IconButton>
+        </div>
+        <div v-else-if="config.setup && !config.validSession" class="qtk:grow">
+            <span class="qtk:text-gray-500 qtk:text-sm">Your session <em class="qtk:text-red-600">expired</em>, please re-authenticate to continue.
+                -></span>
         </div>
         <div v-else class="qtk:grow">
             <span class="qtk:text-gray-500 qtk:text-sm">Please complete the setup first -></span>
