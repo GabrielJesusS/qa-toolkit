@@ -3,7 +3,7 @@ import { useConfig } from '@/composables/useConfig';
 import TaigaAuthForm from '../forms/TaigaAuthForm.vue';
 
 
-const { setConfig } = useConfig();
+const { setConfig, config } = useConfig();
 
 const handleSuccess = () => {
     setConfig((old) => ({
@@ -25,7 +25,7 @@ const handleSuccess = () => {
             <p>
                 Please re-authenticate to continue.
             </p>
-            <TaigaAuthForm @success="handleSuccess" />
+            <TaigaAuthForm v-if="config.provider === 'taiga'" @success="handleSuccess" />
         </div>
     </section>
 </template>
