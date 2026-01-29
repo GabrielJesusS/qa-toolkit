@@ -12,6 +12,12 @@ import { browserClient } from "@/core/BrowserClient";
 import { useSnackbar } from "@/composables/useSnackbar";
 import { HandlerMapEnum } from "@/core/enums/HandlerMapEnum";
 
+type Props = {
+    onSuccess?: () => void;
+    onError?: (error: Error) => void;
+}
+
+const props = defineProps<Props>()
 
 const { errors, isSubmitting, handleSubmit } = useForm({
     validationSchema: toTypedSchema(TaigaLoginSchema),
@@ -20,6 +26,7 @@ const { errors, isSubmitting, handleSubmit } = useForm({
         password: ''
     }
 });
+
 
 const { value: email } = useField<string>('email');
 const { value: password } = useField<string>('password');
@@ -36,7 +43,14 @@ const onSubmit = handleSubmit(async values => {
             }
         })
 
+        props.onSuccess?.();
+
     } catch (error) {
+
+        if (error instanceof Error) {
+            props.onError?.(error);
+        }
+
         notify('Sign in failed, try again.', 'error');
     }
 });
