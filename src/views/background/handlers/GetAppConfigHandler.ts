@@ -16,7 +16,7 @@ export async function GetAppConfigHandler(message: unknown) {
   try {
     const appConfig = await StorageController.get(
       StorageKeyEnum.APP_CONFIG,
-      AppConfigSchema
+      AppConfigSchema,
     );
 
     if (appConfig.provider === "taiga") {
@@ -24,20 +24,19 @@ export async function GetAppConfigHandler(message: unknown) {
 
       const result = await taigaService.checkLogin();
 
-      if (!result) {
-        return {
-          ...DEFAULT_SETTINGS,
-          ...appConfig,
-          setup: false,
-        };
-      }
+      return {
+        ...DEFAULT_SETTINGS,
+        ...appConfig,
+        validSession: result === "active",
+        setup: result !== "invalid" && result !== "inactive",
+      };
     }
 
     return { ...DEFAULT_SETTINGS, ...appConfig };
   } catch (error) {
     await StorageController.set(
       StorageKeyEnum.APP_CONFIG,
-      structuredClone(DEFAULT_SETTINGS)
+      structuredClone(DEFAULT_SETTINGS),
     );
 
     return structuredClone(DEFAULT_SETTINGS);
