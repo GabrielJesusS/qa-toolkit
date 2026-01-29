@@ -55,9 +55,7 @@ type IssueReturn = {
 const MAX_RETRIES = 1;
 
 class TaigaService implements IssueProviderService {
-  // static readonly baseUrl = "https://api.taiga.io/api/v1";
-
-  static readonly baseUrl = "http://localhost:5000";
+  static readonly baseUrl = "https://api.taiga.io/api/v1";
 
   readonly #appUrl = "https://tree.taiga.io";
 
