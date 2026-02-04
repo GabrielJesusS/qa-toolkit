@@ -379,8 +379,6 @@ class TaigaService implements IssueProviderService {
         throw new Error("Auth not found for listing projects");
       }
 
-      console.log({ projectId });
-
       const response = await this.taigaClient<Record<string, string | null>>(
         `/projects/${projectId}/tags_colors`,
         {
