@@ -6,14 +6,19 @@ import TabPanel from "../TabPanel.vue";
 import { ref } from "vue";
 import TaigaSettings from "../settings/TaigaSettings.vue";
 import GeneralSettings from "../settings/GeneralSettings.vue";
+import { useConfig } from "@/composables/useConfig";
+import RevalidateSession from "./RevalidateSession.vue";
 
 const activeTab = ref<string>('general');
+const { config } = useConfig()
+
 
 </script>
 
 
 <template>
-    <section class="qtk:p-5 qtk:max-w-xl qtk:w-full qtk:mx-auto qtk:h-screen qtk:justify-between qtk:flex qtk:flex-col"
+    <section v-if="config.validSession"
+        class="qtk:p-5 qtk:max-w-xl qtk:w-full qtk:mx-auto qtk:h-screen qtk:justify-between qtk:flex qtk:flex-col"
         id="home">
         <div class="qtk:text-center qtk:flex qtk:items-center qtk:mb-6 qtk:space-x-1">
             <Logo class="qtk:size-8 qtk:text-primary" />
@@ -36,4 +41,5 @@ const activeTab = ref<string>('general');
             </TabGroup>
         </div>
     </section>
+    <RevalidateSession v-else />
 </template>
