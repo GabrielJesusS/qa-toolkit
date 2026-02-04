@@ -1,0 +1,26 @@
+@utility custom-scrollbar-* {
+  --sb-thumb-color: --value(--color-*);
+}
+
+@utility custom-scrollbar {
+  --sb-track-color: #d7d7d7;
+  --sb-size: 6px;
+
+  &::-webkit-scrollbar {
+    width: var(--sb-size);
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--sb-track-color);
+    border-radius: 8px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--sb-thumb-color);
+    border-radius: 8px;
+  }
+
+  @supports not selector(::-webkit-scrollbar) {
+    scrollbar-color: var(--sb-thumb-color) var(--sb-track-color);
+  }
+}
