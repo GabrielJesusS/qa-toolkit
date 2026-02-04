@@ -19,7 +19,7 @@ import { safeParseAsync } from 'valibot';
 import { IssueResultSchema } from '@/schemas/issue-result';
 import IssueFeedback from '../IssueFeedback.vue';
 import { useTaigaTags } from '@/composables/useTaigaTags';
-import Select from '../Select.vue';
+import Combobox from '../Combobox.vue';
 
 interface Props {
     screenshotData: ScreenshotDataSchema;
@@ -35,7 +35,6 @@ const isTaigaProvider = computed(() => config.value.provider === "taiga");
 
 const { errors, isSubmitting, handleSubmit } = useForm({
     validationSchema: toTypedSchema(NewIssueSchema),
-
     initialValues: {
         title: '',
         project: isTaigaProvider.value ? settings.value.defaultProjectId : '',
@@ -48,8 +47,15 @@ const { notify } = useSnackbar()
 const { value: title } = useField<string>('title');
 const { value: description } = useField<string>('description');
 const { value: project, setValue } = useField<string>('project');
-
+const { value: tags } = useField<string[]>('tags');
 const { tagsOptions } = useTaigaTags(project)
+
+const mappedTagsOptions = computed(() => {
+    return tagsOptions.value.map(tag => ({
+        label: tag.name,
+        value: tag.value,
+    }))
+})
 
 watch(settings, () => {
     setValue(settings.value.defaultProjectId)
@@ -86,7 +92,6 @@ const onSubmit = handleSubmit(async values => {
 const hasTitleError = computed(() => !!errors?.value.title);
 const hasDescriptionError = computed(() => !!errors?.value.description);
 
-
 </script>
 
 
@@ -106,11 +111,9 @@ const hasDescriptionError = computed(() => !!errors?.value.description);
             <Helper :error="hasDescriptionError" v-if="hasDescriptionError">{{ errors.description }}</Helper>
         </div>
         <ProjectSelector v-model="project" v-show="!settings.defaultProjectId" />
-        <div>
-            <Label for="issue-tags" required>Tags</Label>
-            <Select :options="tagsOptions.map(tag => ({ label: tag.name, value: tag.value }))"
-                id="issue-tags" placeholder="Select a Tag"></Select>
-            <!-- <Helper :error="hasTitleError" v-if="hasTitleError">{{ errors.title }}</Helper> -->
+        <div v-if="!!project">
+            <Label for="issue-tags">Tags</Label>
+            <Combobox v-model="tags" :options="mappedTagsOptions" multiple />
         </div>
         <Button :loading="isSubmitting" type="submit">
             Create issue

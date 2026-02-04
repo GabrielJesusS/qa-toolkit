@@ -2,13 +2,7 @@ import { browserClient } from "@/core/BrowserClient";
 import { HandlerMapEnum } from "@/core/enums/HandlerMapEnum";
 import { TaigaTagsSchema } from "@/schemas/taiga-tags";
 import { safeParseAsync } from "valibot";
-import { Ref, ref, watch } from "vue";
-
-type Option = {
-  name: string;
-  value: string;
-  color: string | null;
-};
+import { computed, Ref, ref, watch } from "vue";
 
 const getTaigaTags = async (projectId: number) => {
   const result = await browserClient.sendMessage({
@@ -21,34 +15,43 @@ const getTaigaTags = async (projectId: number) => {
   const parsedData = await safeParseAsync(TaigaTagsSchema, result);
 
   if (parsedData.success) {
-    const mappedData = Object.keys(parsedData.output).map((key) => ({
-      name: key,
-      value: key,
-      color: null,
-    }));
-
-    return mappedData;
+    return parsedData.output;
   }
 
-  return [];
+  return {};
 };
 
-export function useTaigaTags(projectId: Ref<string>) {
-  const hasLoaded = ref(false);
+function tagsToList(tags: TaigaTagsSchema) {
+  return Object.keys(tags).map((key) => ({
+    name: key,
+    value: key,
+    color: null,
+  }));
+}
 
-  const tagsOptions = ref<Option[]>([]);
+export function useTaigaTags(projectId: Ref<string>) {
+  const tags = ref<Map<string, TaigaTagsSchema>>(new Map());
 
   watch(projectId, async () => {
     if (projectId.value === "") return;
 
-    if (!hasLoaded.value) {
-      tagsOptions.value = await getTaigaTags(Number(projectId.value));
-      hasLoaded.value = true;
+    if (!tags.value.has(projectId.value)) {
+      const result = await getTaigaTags(Number(projectId.value));
+      tags.value.set(projectId.value, result);
     }
   });
 
+  const tagsOptions = computed(() => {
+    if (projectId.value === "") return [];
+
+    if (tags.value.has(projectId.value)) {
+      return tagsToList(tags.value.get(projectId.value)!);
+    }
+
+    return [];
+  });
+
   return {
-    hasLoaded,
     tagsOptions,
   };
 }

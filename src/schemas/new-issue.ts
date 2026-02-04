@@ -12,6 +12,7 @@ export const NewIssueSchema = v.object({
     v.nonEmpty("Description is required"),
     v.maxLength(512, "Description must be at most 512 characters")
   ),
+  tags: v.array(v.string()),
 });
 
 export type NewIssueSchema = v.InferOutput<typeof NewIssueSchema>;
