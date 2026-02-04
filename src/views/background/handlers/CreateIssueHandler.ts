@@ -31,6 +31,7 @@ export async function CreateIssueHandler(message: unknown) {
       trackInfo: trackInfo,
       locale: locale,
       href: parsedMessage.data.href,
+      tags: parsedMessage.data.tags,
     });
 
     return {

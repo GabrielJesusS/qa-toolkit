@@ -72,6 +72,7 @@ const onSubmit = handleSubmit(async values => {
                 projectId: values.project,
                 print: props.screenshotData.screenshot,
                 href: props.screenshotData.location,
+                tags: values.tags,
             },
         });
 

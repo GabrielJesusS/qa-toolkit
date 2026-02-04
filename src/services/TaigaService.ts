@@ -218,6 +218,7 @@ class TaigaService implements IssueProviderService {
         body: JSON.stringify({
           subject: issueData.subject,
           project: issueData.project,
+          tags: issueData.tags || []
         }),
       });
 
