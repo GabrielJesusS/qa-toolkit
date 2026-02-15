@@ -9,4 +9,5 @@ export type IssueData = {
   locale: string;
   href: string;
   tags?: string[];
+  assigned?: number;
 };

@@ -20,6 +20,8 @@ import { IssueResultSchema } from '@/schemas/issue-result';
 import IssueFeedback from '../IssueFeedback.vue';
 import { useTaigaTags } from '@/composables/useTaigaTags';
 import Combobox from '../Combobox.vue';
+import { useTaigaMembers } from '@/composables/useTaigaMembers';
+import Select from '../Select.vue';
 
 interface Props {
     screenshotData: ScreenshotDataSchema;
@@ -39,6 +41,8 @@ const { errors, isSubmitting, handleSubmit } = useForm({
         title: '',
         project: isTaigaProvider.value ? settings.value.defaultProjectId : '',
         description: '',
+        tags: [],
+        assigned: undefined,
     }
 });
 
@@ -47,13 +51,23 @@ const { notify } = useSnackbar()
 const { value: title } = useField<string>('title');
 const { value: description } = useField<string>('description');
 const { value: project, setValue } = useField<string>('project');
+const { value: assigned } = useField<number>('assigned');
 const { value: tags } = useField<string[]>('tags');
+
 const { tagsOptions } = useTaigaTags(project)
+const { membersOptions } = useTaigaMembers(project)
 
 const mappedTagsOptions = computed(() => {
     return tagsOptions.value.map(tag => ({
         label: tag.name,
         value: tag.value,
+    }))
+})
+
+const mappedMembersOptions = computed(() => {
+    return membersOptions.value.map(member => ({
+        label: member.name,
+        value: member.value,
     }))
 })
 
@@ -73,6 +87,7 @@ const onSubmit = handleSubmit(async values => {
                 print: props.screenshotData.screenshot,
                 href: props.screenshotData.location,
                 tags: values.tags,
+                assigned: values.assigned,
             },
         });
 
@@ -92,6 +107,7 @@ const onSubmit = handleSubmit(async values => {
 
 const hasTitleError = computed(() => !!errors?.value.title);
 const hasDescriptionError = computed(() => !!errors?.value.description);
+const hasAssignedError = computed(() => !!errors?.value.assigned);
 
 </script>
 
@@ -115,6 +131,11 @@ const hasDescriptionError = computed(() => !!errors?.value.description);
         <div v-if="!!project">
             <Label for="issue-tags">Tags</Label>
             <Combobox v-model="tags" :options="mappedTagsOptions" multiple />
+        </div>
+        <div v-if="!!project">
+            <Label for="issue-assigned">Assigned</Label>
+            <Select v-model="assigned" :options="mappedMembersOptions" :value-as-number="true" />
+            <Helper :error="hasAssignedError" v-if="hasAssignedError">{{ errors.assigned }}</Helper>
         </div>
         <Button :loading="isSubmitting" type="submit">
             Create issue
