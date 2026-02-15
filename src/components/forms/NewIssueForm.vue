@@ -113,19 +113,12 @@ const hasAssignedError = computed(() => !!errors?.value.assigned);
 
 
 <template>
-    <form @submit="onSubmit" class="qtk:space-y-4 qtk:max-w-2xs qtk:flex qtk:flex-col qtk:items-stretch qtk:w-full">
+    <form @submit="onSubmit" class="qtk:space-y-4 qtk:flex qtk:flex-col qtk:items-stretch qtk:w-full">
         <div>
             <Label for="issue-title" required>Title</Label>
             <Input :maxlength="255" id="issue-title" :error="hasTitleError" v-model="title" type="text"
                 placeholder="Issue title" />
             <Helper :error="hasTitleError" v-if="hasTitleError">{{ errors.title }}</Helper>
-        </div>
-
-        <div>
-            <Label for="issue-description" required>Description</Label>
-            <Textarea :maxlength="512" id="issue-description" :error="hasDescriptionError" v-model="description"
-                type="text" placeholder="Issue description" />
-            <Helper :error="hasDescriptionError" v-if="hasDescriptionError">{{ errors.description }}</Helper>
         </div>
         <ProjectSelector v-model="project" v-show="!settings.defaultProjectId" />
         <div v-if="!!project">
@@ -136,6 +129,12 @@ const hasAssignedError = computed(() => !!errors?.value.assigned);
             <Label for="issue-assigned">Assigned</Label>
             <Select v-model="assigned" :options="mappedMembersOptions" :value-as-number="true" />
             <Helper :error="hasAssignedError" v-if="hasAssignedError">{{ errors.assigned }}</Helper>
+        </div>
+        <div>
+            <Label for="issue-description" required>Description</Label>
+            <Textarea :maxlength="512" id="issue-description" :error="hasDescriptionError" v-model="description"
+                type="text" placeholder="Issue description" />
+            <Helper :error="hasDescriptionError" v-if="hasDescriptionError">{{ errors.description }}</Helper>
         </div>
         <Button :loading="isSubmitting" type="submit">
             Create issue

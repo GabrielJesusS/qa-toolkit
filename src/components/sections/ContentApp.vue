@@ -1,48 +1,57 @@
 <script setup lang="ts">
-import { computed, Transition } from 'vue'
+import { ref, Transition } from 'vue'
 import Paper from '@/components/Paper.vue';
 import IssueCreator from '@/components/sections/IssueCreator.vue';
 import { useScreenshot } from '@/composables/useScreenshot';
 import clsx from 'clsx';
 import ContentButton from "@/components/ContentButton.vue";
 import { useConfig } from '@/composables/useConfig';
+import X from "@/assets/x.svg?component"
 
 const screenshot = useScreenshot()
 const { config } = useConfig()
+const isWorking = ref(false);
 
-const toggle = () => {
+const toggle = async () => {
     if (screenshot.screenshotState.value === null) {
-        screenshot.takeScreenshot();
+        await screenshot.takeScreenshot();
+
+        isWorking.value = true;
         return
     }
 
-    screenshot.clearScreenshot();
+    isWorking.value = false
+
+    setTimeout(() => {
+        if (!isWorking.value) {
+            screenshot.clearScreenshot();
+        }
+    }, 300)
 }
 
 const onSuccess = () => {
     screenshot.clearScreenshot();
+    isWorking.value = false;
 }
-
-const hasScreenshot = computed(() => {
-    return screenshot.screenshotState.value !== null
-});
 
 </script>
 
 <template>
     <div data-qtk-anchor v-if="config.setup && !!config.validSession" :class="clsx('qtk:fixed qtk:z-99999 qtk:gap-4 qtk:right-0 qtk:bottom-0 qtk:flex qtk:flex-col qtk:items-end qtk:m-5',
-        {
-            'qtk:opacity-0 qtk:pointer-events-none': !!screenshot.isLoading.value
-        })">
+        screenshot.isTaking.value && 'qtk:opacity-0 qtk:pointer-events-none'
+    )">
         <Transition mode="out-in" name="slide-fade">
-            <div v-show="hasScreenshot" class="qtk:transition-opacity qtk:duration-300 qtk:max-w-xs qtk:overflow-hidden"
-                :class="hasScreenshot ? 'qtk:opacity-100' : 'qtk:opacity-0'">
-                <Paper class="qtk:w-xs">
+            <div v-show="isWorking" class="qtk:max-w-sm qtk:overflow-hidden">
+                <Paper class="qtk:w-sm qtk:relative">
+                    <button autofocus="false" @click="toggle" type="button"
+                        class="qtk:cursor-pointer qtk:text-slate-900 qtk:hover:text-red-500 qtk:size-6 qtk:absolute qtk:right-4 qtk:top-4">
+                        <X />
+                    </button>
                     <IssueCreator @success="onSuccess" v-if="screenshot.screenshotState.value !== null"
                         :screenshotData="screenshot.screenshotState.value" />
                 </Paper>
             </div>
         </Transition>
-        <ContentButton @click="toggle" />
+        <ContentButton :aria-busy="screenshot.isLoading.value" :disabled="screenshot.isLoading.value" @click="toggle" />
     </div>
 </template>
