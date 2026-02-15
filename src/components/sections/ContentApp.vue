@@ -35,9 +35,9 @@ const hasScreenshot = computed(() => {
             'qtk:opacity-0 qtk:pointer-events-none': !!screenshot.isLoading.value
         })">
         <Transition mode="out-in" name="slide-fade">
-            <div v-show="hasScreenshot" class="qtk:transition-opacity qtk:duration-300 qtk:max-w-xs qtk:overflow-hidden"
+            <div v-show="hasScreenshot" class="qtk:transition-opacity qtk:duration-300 qtk:max-w-sm qtk:overflow-hidden"
                 :class="hasScreenshot ? 'qtk:opacity-100' : 'qtk:opacity-0'">
-                <Paper class="qtk:w-xs">
+                <Paper class="qtk:w-sm">
                     <IssueCreator @success="onSuccess" v-if="screenshot.screenshotState.value !== null"
                         :screenshotData="screenshot.screenshotState.value" />
                 </Paper>

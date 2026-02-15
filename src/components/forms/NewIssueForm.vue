@@ -113,7 +113,7 @@ const hasAssignedError = computed(() => !!errors?.value.assigned);
 
 
 <template>
-    <form @submit="onSubmit" class="qtk:space-y-4 qtk:max-w-2xs qtk:flex qtk:flex-col qtk:items-stretch qtk:w-full">
+    <form @submit="onSubmit" class="qtk:space-y-4 qtk:flex qtk:flex-col qtk:items-stretch qtk:w-full">
         <div>
             <Label for="issue-title" required>Title</Label>
             <Input :maxlength="255" id="issue-title" :error="hasTitleError" v-model="title" type="text"
