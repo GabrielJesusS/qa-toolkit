@@ -10,6 +10,7 @@ import { GetTaigaSettingsHandler } from "./GetTaigaSettingsHandler";
 import { SetAppConfigHandler } from "./SetAppConfigHandler";
 import { ResetAppHandler } from "./ResetAppHandler";
 import { GetTaigaTagsHandler } from "./GetTaigaTagsHandler";
+import { GetTaigaMembersHandler } from "./GetTaigaMembersHandler";
 
 messageController.registerHandler(HandlerMapEnum.TAIGA_SIGN_IN, TaigaSignInHandler);
 messageController.registerHandler(HandlerMapEnum.GET_APP_CONFIG, GetAppConfigHandler);
@@ -21,3 +22,4 @@ messageController.registerHandler(HandlerMapEnum.GET_TAIGA_SETTINGS, GetTaigaSet
 messageController.registerHandler(HandlerMapEnum.SET_APP_CONFIG, SetAppConfigHandler);
 messageController.registerHandler(HandlerMapEnum.RESET_APP, ResetAppHandler);
 messageController.registerHandler(HandlerMapEnum.GET_TAIGA_TAGS, GetTaigaTagsHandler)
+messageController.registerHandler(HandlerMapEnum.GET_TAIGA_MEMBERS, GetTaigaMembersHandler)
