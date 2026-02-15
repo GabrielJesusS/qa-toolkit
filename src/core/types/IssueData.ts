@@ -8,4 +8,5 @@ export type IssueData = {
   trackInfo?: TrackInfo[];
   locale: string;
   href: string;
+  tags?: string[];
 };

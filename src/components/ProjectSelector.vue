@@ -3,10 +3,7 @@ import { useListProjects } from '@/composables/useListProjects';
 import Label from './Label.vue';
 import Select from './Select.vue';
 
-
 const { projects } = useListProjects();
-
-
 
 </script>
 
