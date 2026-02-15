@@ -120,13 +120,6 @@ const hasAssignedError = computed(() => !!errors?.value.assigned);
                 placeholder="Issue title" />
             <Helper :error="hasTitleError" v-if="hasTitleError">{{ errors.title }}</Helper>
         </div>
-
-        <div>
-            <Label for="issue-description" required>Description</Label>
-            <Textarea :maxlength="512" id="issue-description" :error="hasDescriptionError" v-model="description"
-                type="text" placeholder="Issue description" />
-            <Helper :error="hasDescriptionError" v-if="hasDescriptionError">{{ errors.description }}</Helper>
-        </div>
         <ProjectSelector v-model="project" v-show="!settings.defaultProjectId" />
         <div v-if="!!project">
             <Label for="issue-tags">Tags</Label>
@@ -136,6 +129,12 @@ const hasAssignedError = computed(() => !!errors?.value.assigned);
             <Label for="issue-assigned">Assigned</Label>
             <Select v-model="assigned" :options="mappedMembersOptions" :value-as-number="true" />
             <Helper :error="hasAssignedError" v-if="hasAssignedError">{{ errors.assigned }}</Helper>
+        </div>
+        <div>
+            <Label for="issue-description" required>Description</Label>
+            <Textarea :maxlength="512" id="issue-description" :error="hasDescriptionError" v-model="description"
+                type="text" placeholder="Issue description" />
+            <Helper :error="hasDescriptionError" v-if="hasDescriptionError">{{ errors.description }}</Helper>
         </div>
         <Button :loading="isSubmitting" type="submit">
             Create issue

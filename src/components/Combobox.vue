@@ -22,7 +22,7 @@ interface Props<T = any> {
 }
 
 const props = withDefaults(defineProps<Props<T>>(), {
-    placeholder: 'Selecione...',
+    placeholder: 'Select...',
     multiple: false,
     disabled: false,
     searchable: true,
@@ -228,13 +228,13 @@ watch(isOpen, (open) => {
                     <div v-if="filteredOptions.length === 0"
                         class="qtk:px-3 qtk:py-8 qtk:text-center qtk:text-sm qtk:text-gray-500">
                         <slot name="empty">
-                            Nenhum resultado encontrado
+                            No matches
                         </slot>
                     </div>
                 </div>
                 <!-- Busca -->
                 <div v-if="searchable" class="qtk:p-2 qtk:border-b qtk:border-gray-200 qtk:shrink-0 qtk:flex">
-                    <Input autofocus v-model="searchQuery" @keydown="onKeydown" type="text" placeholder="Buscar..."
+                    <Input autofocus v-model="searchQuery" @keydown="onKeydown" type="text" placeholder="Search..."
                         @click.stop />
                 </div>
 

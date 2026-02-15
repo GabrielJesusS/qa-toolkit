@@ -20,7 +20,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
     modelValue: '',
-    placeholder: 'Selecione uma opção',
+    placeholder: 'Select...',
     valueAsNumber: false,
 })
 
