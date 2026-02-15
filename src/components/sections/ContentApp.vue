@@ -6,6 +6,7 @@ import { useScreenshot } from '@/composables/useScreenshot';
 import clsx from 'clsx';
 import ContentButton from "@/components/ContentButton.vue";
 import { useConfig } from '@/composables/useConfig';
+import X from "@/assets/x.svg?component"
 
 const screenshot = useScreenshot()
 const { config } = useConfig()
@@ -41,7 +42,11 @@ const onSuccess = () => {
     )">
         <Transition mode="out-in" name="slide-fade">
             <div v-show="isWorking" class="qtk:max-w-sm qtk:overflow-hidden">
-                <Paper class="qtk:w-sm">
+                <Paper class="qtk:w-sm qtk:relative">
+                    <button autofocus="false" @click="toggle" type="button"
+                        class="qtk:cursor-pointer qtk:text-slate-900 qtk:hover:text-red-500 qtk:size-6 qtk:absolute qtk:right-4 qtk:top-4">
+                        <X />
+                    </button>
                     <IssueCreator @success="onSuccess" v-if="screenshot.screenshotState.value !== null"
                         :screenshotData="screenshot.screenshotState.value" />
                 </Paper>

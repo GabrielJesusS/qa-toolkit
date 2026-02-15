@@ -15,7 +15,7 @@ const props = defineProps<Props>()
 
 <template>
     <section class="qtk:flex qtk:flex-col qtk:gap-3 qtk:text-gray-900">
-        <h2 class="qtk:font-bold qtk:text-lg">
+        <h2 class="qtk:font-bold qtk:text-lg qtk:leading-6">
             Create issue
         </h2>
         <img :src="props.screenshotData.screenshot" alt="Screenshot of the issue" class="qtk:w-full qtk:rounded-md" />
