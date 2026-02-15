@@ -9,6 +9,8 @@ export const CreateIssueMessage = v.object({
     projectId: v.string(),
     print: v.string(),
     href: v.string(),
+    tags: v.optional(v.array(v.string())),
+    assigned: v.optional(v.number()),
   }),
 });
 

@@ -52,6 +52,11 @@ type IssueReturn = {
   url: string;
 };
 
+type MembershipResponse = {
+  id: number;
+  full_name: string;
+};
+
 const MAX_RETRIES = 1;
 
 class TaigaService implements IssueProviderService {
@@ -218,6 +223,8 @@ class TaigaService implements IssueProviderService {
         body: JSON.stringify({
           subject: issueData.subject,
           project: issueData.project,
+          tags: issueData.tags || [],
+          assigned_to: issueData.assigned,
         }),
       });
 
@@ -368,6 +375,56 @@ class TaigaService implements IssueProviderService {
         "Taiga project listing failed",
       );
       throw new TaigaServiceError(parsedError.message, "LIST_PROJECTS", error);
+    }
+  }
+
+  async getTags(projectId: number): Promise<Record<string, string | null>> {
+    try {
+      const tokens = await this.getAuth();
+
+      if (!tokens) {
+        throw new Error("Auth not found for listing projects");
+      }
+
+      const response = await this.taigaClient<Record<string, string | null>>(
+        `/projects/${projectId}/tags_colors`,
+        {
+          method: HttpMethodsEnum.GET,
+        },
+      );
+
+      return response.data;
+    } catch (error) {
+      const parsedError = handleRequestError(
+        error,
+        "Taiga tags listing failed",
+      );
+      throw new TaigaServiceError(parsedError.message, "GET_TAGS", error);
+    }
+  }
+
+  async listMembers(projectId: number): Promise<MembershipResponse[]> {
+    try {
+      const tokens = await this.getAuth();
+
+      if (!tokens) {
+        throw new Error("Auth not found for listing members");
+      }
+
+      const response = await this.taigaClient<MembershipResponse[]>(
+        `/users?project=${projectId}`,
+        {
+          method: HttpMethodsEnum.GET,
+        },
+      );
+
+      return response.data;
+    } catch (error) {
+      const parsedError = handleRequestError(
+        error,
+        "Taiga members listing failed",
+      );
+      throw new TaigaServiceError(parsedError.message, "GET_MEMBERS", error);
     }
   }
 }

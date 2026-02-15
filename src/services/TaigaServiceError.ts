@@ -8,6 +8,8 @@ export type TaigaServiceErrorType =
   | "CREATE_ISSUE"
   | "CHECK_LOGIN"
   | "LIST_PROJECTS"
+  | "GET_TAGS"
+  | "GET_MEMBERS"
   | "GENERIC";
 
 export class TaigaServiceError extends Error {

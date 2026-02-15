@@ -13,7 +13,7 @@ const { notifications } = useSnackbar();
 
 const props = withDefaults(defineProps<Props>(), { position: 'bottom-right', large: false });
 
-const classes = computed(() => clsx('qtk:z-99999999 qtk:fixed qtk:transform qtk:flex qtk:flex-col qtk:space-y-2', {
+const classes = computed(() => clsx('qtk:z-99999999 qtk:pointer-events-none qtk:fixed qtk:transform qtk:flex qtk:flex-col qtk:space-y-2', {
     'qtk:bottom-0 qtk:py-4 qtk:top-auto': props.position.startsWith('bottom'),
     'qtk:top-0 qtk:py-4 qtk:bottom-auto': props.position.startsWith('top'),
     'qtk:right-0 qtk:px-4 qtk:left-auto': props.position.endsWith('right'),
@@ -25,7 +25,7 @@ const classes = computed(() => clsx('qtk:z-99999999 qtk:fixed qtk:transform qtk:
 
 <template>
     <div :class="classes">
-        <ul class="qtk:flex qtk:flex-col qtk:gap-1 qtk:w-full">
+        <ul class="qtk:flex qtk:flex-col qtk:gap-1 qtk:w-full qtk:pointer-events-auto">
             <TransitionGroup name="slide-fade">
                 <li v-for="notification in notifications" :key="notification.id">
                     <Toast :type="notification.type">

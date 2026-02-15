@@ -16,18 +16,26 @@ export function useScreenshot() {
 
   const isLoading = ref<boolean>(false);
 
+  const isTaking = ref<boolean>(false);
+
   async function takeScreenshot() {
     try {
       isLoading.value = true;
 
       await sleep(500);
 
+      isTaking.value = true;
+
       const result = await browserClient.sendMessage({
         type: HandlerMapEnum.TAKE_SCREENSHOT,
         data: {},
       });
 
-      await sleep(500);
+      await sleep(100);
+
+      isTaking.value = false;
+
+      await sleep(200);
 
       const parsed = await parseAsync(ScreenshotSchema, result);
 
@@ -39,6 +47,7 @@ export function useScreenshot() {
       notify("Failed to take screenshot.", "error");
     } finally {
       isLoading.value = false;
+      isTaking.value = false;
     }
   }
 
@@ -49,6 +58,7 @@ export function useScreenshot() {
   return {
     screenshotState,
     isLoading,
+    isTaking,
     takeScreenshot,
     clearScreenshot,
   };

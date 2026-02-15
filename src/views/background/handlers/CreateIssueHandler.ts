@@ -11,7 +11,7 @@ export async function CreateIssueHandler(message: unknown) {
 
   const appConfig = await StorageController.get(
     StorageKeyEnum.APP_CONFIG,
-    AppConfigSchema
+    AppConfigSchema,
   );
 
   const locale = chrome.i18n.getUILanguage();
@@ -31,6 +31,8 @@ export async function CreateIssueHandler(message: unknown) {
       trackInfo: trackInfo,
       locale: locale,
       href: parsedMessage.data.href,
+      tags: parsedMessage.data.tags,
+      assigned: parsedMessage.data.assigned,
     });
 
     return {

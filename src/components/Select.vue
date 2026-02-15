@@ -15,11 +15,13 @@ interface Props {
     id?: string
     name?: string
     error?: boolean
+    valueAsNumber?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
     modelValue: '',
-    placeholder: 'Selecione uma opção',
+    placeholder: 'Select...',
+    valueAsNumber: false,
 })
 
 const emit = defineEmits<{
@@ -27,8 +29,12 @@ const emit = defineEmits<{
 }>()
 
 const handleChange = (event: Event) => {
-    const target = event.target as HTMLSelectElement
-    emit('update:modelValue', target.value)
+    const { target } = event
+
+    if (!(target instanceof HTMLSelectElement)) return
+
+    const value = props.valueAsNumber ? Number(target.value) : target.value
+    emit('update:modelValue', value)
 }
 </script>
 

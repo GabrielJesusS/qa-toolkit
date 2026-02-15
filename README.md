@@ -20,9 +20,9 @@ A browser extension to enhance your QA workflow.
 
 ### Taiga Service
 
-- [ ] Add tags to the issue;
+- [x] Add tags to the issue;
 - [ ] Edit the content style;
-- [ ] Assign the issue to a responsible person;
+- [x] Assign the issue to a responsible person;
 - [ ] Mention users in the body of the issue;
 - [ ] Set the urgency level of the issue;
 - [ ] Set a status for the issue;

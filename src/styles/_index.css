@@ -8,3 +8,5 @@
   @import "./preflight.css";
   @import "./base/_index.css";
 }
+
+@import './utilities/_index.css';
