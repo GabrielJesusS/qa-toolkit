@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.0] - Release Date: 2026-02-15
+- **Added issue assignment**: Users can now assign team members to issues when creating them in Taiga.
+- **Added tags support**: Issues can now be tagged with project tags for better organization.
+- **Improved issue creation interface**: Enhanced UI with image preview, close button, loading transitions, and better visual feedback.
+- **UI improvements**: Fixed content button pointer, input text color, and popup width adjustments.
+
 ## [0.1.3] - Release Date: 2026-02-04
 - **Fixed initial sign in lock**: Resolved an issue where users were unable to sign in for the first time due to a locking screen problem.
 
